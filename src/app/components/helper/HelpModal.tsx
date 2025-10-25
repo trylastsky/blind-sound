@@ -12,7 +12,6 @@ import {
     AudioLines,
     Headphones,
     ToyBrick,
-    Star,
     Target
 } from 'lucide-react';
 
@@ -46,9 +45,6 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                 title="Помощь и инструкции"
             >
                 <HelpCircle className="w-7 h-7 group-hover:scale-110 transition-transform" />
-                <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-400 rounded-full flex items-center justify-center">
-                    <Star className="w-3 h-3 text-white" />
-                </div>
             </button>
 
             {isOpen && (
