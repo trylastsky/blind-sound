@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect, useRef, useCallback} from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { soundDescriptions, obstacleDescriptions } from "./descriptions";
-import { AlertTriangle, CheckCircle2, Hourglass, Play, Search, StopCircle} from 'lucide-react';
+import { AlertTriangle, AudioWaveform, Box, Boxes, CheckCircle2, DraftingCompass, Hourglass, Play, Ruler, Search, Square, StopCircle, TriangleRight } from 'lucide-react';
 import { StatsData } from '@/app/page';
 import { SoundType } from '@/app/types/SoundType';
 import { createFallbackSound } from '@/app/services/audio/createFallbackSound';
@@ -48,7 +48,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
 
     const [settings, setSettings] = useState<TrainerSettings>(() => {
         const savedSettings = localStorage.getItem('soundTrainerSettings');
-        if(savedSettings) {
+        if (savedSettings) {
             const parsedSettings = JSON.parse(savedSettings);
             return parsedSettings;
         }
@@ -410,7 +410,6 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         return pixelDistance * 0.02;
     };
 
-    // Подготовка опций для выпадающих списков
     const soundOptions = Object.entries(soundDescriptions).map(([key, { icon, name }]) => ({
         value: key,
         label: name,
@@ -430,11 +429,14 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
     ];
 
     return (
-        <div className="flex flex-col items-center space-y-6">
-            <div className="bg-blue-800 rounded-lg p-4 w-full max-w-4xl">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div className="flex flex-col items-center space-y-8">
+            <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-2xl p-6 w-full max-w-4xl border-2 border-purple-500/30 shadow-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div>
-                        <label className="block text-sm font-medium mb-2">Сложность</label>
+                        <label className="flex items-center gap-2 block text-sm font-semibold mb-3 text-blue-200 uppercase tracking-wide">
+                            <DraftingCompass className='w-4 h-4' />
+                            Сложность
+                        </label>
                         <CustomSelect
                             value={settings.difficulty}
                             onChange={(value) => setDifficulty(value as 'easy' | 'medium' | 'hard')}
@@ -444,7 +446,10 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium mb-2">Тип звука</label>
+                        <label className="flex items-center gap-2 block text-sm font-semibold mb-3 text-purple-200 uppercase tracking-wide">
+                            <AudioWaveform className='w-4 h-4' />
+                            Тип звука
+                        </label>
                         <CustomSelect
                             value={settings.soundType}
                             onChange={(value) => setSoundType(value as SoundType)}
@@ -454,7 +459,10 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium mb-2">Препятствия</label>
+                        <label className="flex items-center gap-2 block text-sm font-semibold mb-3 text-red-200 uppercase tracking-wide">
+                            <Boxes className='w-4 h-4' />
+                            Препятствия
+                        </label>
                         <CustomSelect
                             value={settings.obstacleType}
                             onChange={(value) => setObstacleType(value as ObstacleType)}
@@ -463,47 +471,62 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                         />
                     </div>
 
-                    <div className="flex flex-col justify-end space-y-2">
-                        <div className="text-xs text-blue-200">
-                            Режим: <strong>{currentMode.toUpperCase()}</strong>
+                    <div className="flex flex-col justify-end space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-blue-300 bg-blue-800/50 px-3 py-2 rounded-lg border border-blue-600/30">
+                            {currentMode === '2d' ? <Square className='w-4 h-4' /> : <Box className='w-4 h-4' />}
+                            <strong>Режим: {currentMode.toUpperCase()}</strong>
                         </div>
-                        <div className="text-xs text-blue-200">
-                            Статус: <strong>
+                        <div className="text-sm bg-purple-800/50 px-3 py-2 rounded-lg border border-purple-600/30">
+                            <strong className={statusFind ? 'text-green-400' : 'text-yellow-400'}>
                                 {statusFind ?
-                                    <span className='flex gap-1'><Search className='w-4 h-4' />Поиск</span> :
-                                    <span className='flex gap-1'><Hourglass className='w-4 h-4' />Ожидание</span>
+                                    <span className='flex gap-2 items-center'><Search className='w-4 h-4' />Поиск</span> :
+                                    <span className='flex gap-2 items-center'><Hourglass className='w-4 h-4' />Ожидание</span>
                                 }
                             </strong>
                         </div>
                     </div>
                 </div>
 
-                <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">
-                        Громкость: {Math.round(settings.volume * 100)}%
+                <div className="mb-6">
+                    <label className="flex items-center gap-2 block text-sm font-semibold mb-3 text-green-200 uppercase tracking-wide">
+                        <TriangleRight className='w-4 h-4' /> Громкость: {Math.round(settings.volume * 100)}%
                     </label>
-                    <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={settings.volume}
-                        onChange={(e) => setVolume(parseFloat(e.target.value))}
-                        className="w-full h-2 bg-blue-700 rounded-lg appearance-none cursor-pointer"
-                    />
-                </div>
-
-                <div className="text-center text-blue-200 text-sm mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div className="flex items-center justify-center gap-2">
-                        {soundDescriptions[settings.soundType].icon}
-                        <div>
-                            <strong>{soundDescriptions[settings.soundType].name}</strong> - {soundDescriptions[settings.soundType].desc}
+                    <div className="relative">
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value={settings.volume}
+                            onChange={(e) => setVolume(parseFloat(e.target.value))}
+                            className="w-full h-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-purple-500 [&::-webkit-slider-thumb]:shadow-lg"
+                        />
+                        <div className="flex justify-between text-xs text-blue-300 mt-2">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
                         </div>
                     </div>
-                    <div className="flex items-center justify-center gap-2">
-                        {obstacleDescriptions[settings.obstacleType].icon}
-                        <div>
-                            <strong>{obstacleDescriptions[settings.obstacleType].name}</strong> - {obstacleDescriptions[settings.obstacleType].desc}
+                </div>
+
+                {/* Current Selection Display */}
+                <div className="text-center text-blue-200 text-sm mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-center gap-3 bg-blue-800/30 p-3 rounded-xl border border-blue-600/30">
+                        <div className="text-purple-300">
+                            {soundDescriptions[settings.soundType].icon}
+                        </div>
+                        <div className="text-left">
+                            <div className="font-semibold text-white">{soundDescriptions[settings.soundType].name}</div>
+                            <div className="text-blue-300 text-xs">{soundDescriptions[settings.soundType].desc}</div>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 bg-purple-800/30 p-3 rounded-xl border border-purple-600/30">
+                        <div className="text-red-300">
+                            {obstacleDescriptions[settings.obstacleType].icon}
+                        </div>
+                        <div className="text-left">
+                            <div className="font-semibold text-white">{obstacleDescriptions[settings.obstacleType].name}</div>
+                            <div className="text-purple-300 text-xs">{obstacleDescriptions[settings.obstacleType].desc}</div>
                         </div>
                     </div>
                 </div>
@@ -512,16 +535,16 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     <button
                         onClick={startNewRound}
                         disabled={isPlaying}
-                        className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white font-semibold py-3 rounded-md transition-colors flex items-center justify-center space-x-2 p-5"
+                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 disabled:from-green-800 disabled:to-emerald-900 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg border-2 border-green-500/30 disabled:border-green-800/30 disabled:cursor-not-allowed"
                     >
                         {isPlaying ? (
                             <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                <span>Звук воспроизводится...</span>
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span>Воспроизведение</span>
                             </>
                         ) : (
                             <>
-                                <Play className="w-4 h-4" />
+                                <Play className="w-5 h-5" />
                                 <span>Новый звук</span>
                             </>
                         )}
@@ -530,9 +553,9 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     {isPlaying && (
                         <button
                             onClick={stopSound}
-                            className="px-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md transition-colors flex items-center gap-2"
+                            className="px-8 bg-gradient-to-r from-red-600 to-pink-700 hover:from-red-700 hover:to-pink-800 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg border-2 border-red-500/30"
                         >
-                            <StopCircle className="w-4 h-4" />
+                            <StopCircle className="w-5 h-5" />
                             Стоп
                         </button>
                     )}
@@ -546,14 +569,17 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                         width={canvasSize}
                         height={canvasSize}
                         onClick={handleCanvasClick}
-                        className={`border-2 border-blue-600 rounded-lg ${statusFind ? 'cursor-crosshair' : 'cursor-not-allowed opacity-80'} bg-slate-800 transition-all hover:border-blue-500`}
+                        className={`border-4 rounded-2xl ${statusFind ?
+                            'cursor-crosshair border-green-500/50 shadow-2xl shadow-green-500/20' :
+                            'cursor-not-allowed opacity-80 border-blue-500/30'
+                            } bg-gradient-to-br from-slate-900 to-blue-900 transition-all duration-700 hover:border-green-500/70`}
                         style={{ width: canvasSize, height: canvasSize }}
                     />
 
                     {showResult && soundSource && userGuess && (
-                        <div className="absolute top-4 left-4 bg-black bg-opacity-70 p-3 rounded-lg">
-                            <div className="text-sm">
-                                Расстояние: {calculateDistanceInMeters(userGuess, soundSource).toFixed(2)}м
+                        <div className="absolute top-88 left-55 bg-black/80 backdrop-blur-sm p-2 rounded-xl border border-green-500/30 shadow-2xl">
+                            <div className="flex gap-2 items-center justify-center text-sm font-semibold text-green-400">
+                                <Ruler className='w-4 h-4' /> Расстояние: {calculateDistanceInMeters(userGuess, soundSource).toFixed(2)}м
                             </div>
                         </div>
                     )}
@@ -569,22 +595,22 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                 />
             )}
 
-            <div className="text-center text-blue-200 max-w-md">
-                <p className="flex items-center justify-center gap-2">
+            <div className="text-center text-blue-200 max-w-md bg-blue-900/50 p-4 rounded-xl border border-blue-500/30">
+                <p className="flex items-center justify-center gap-3 text-lg font-semibold">
                     {currentMode === '3d'
                         ? 'Кликните в 3D пространстве чтобы указать источник звука'
-                        : 'Кликните на круге в том месте, откуда, по вашему мнению, исходит звук'
+                        : 'Кликните на круге в том месте, откуда исходит звук'
                     }
                 </p>
                 {!statusFind && (
-                    <p className="text-yellow-300 mt-2 flex items-center justify-center gap-2">
-                        <AlertTriangle className="w-4 h-4" />
+                    <p className="text-yellow-300 mt-3 flex items-center justify-center gap-3 text-sm bg-yellow-500/20 p-2 rounded-lg">
+                        <AlertTriangle className="w-5 h-5" />
                         {`Нажмите "Новый звук" чтобы начать поиск`}
                     </p>
                 )}
                 {statusFind && (
-                    <p className="text-green-300 mt-2 flex items-center justify-center gap-2">
-                        <CheckCircle2 className="w-4 h-4" />
+                    <p className="text-green-300 mt-3 flex items-center justify-center gap-3 text-sm bg-green-500/20 p-2 rounded-lg">
+                        <CheckCircle2 className="w-5 h-5" />
                         Можете кликать для указания источника звука
                     </p>
                 )}
