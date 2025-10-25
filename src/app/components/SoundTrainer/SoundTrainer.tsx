@@ -151,7 +151,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
 
     const initAudio = useCallback(async () => {
         if (!audioContextRef.current) {
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+            audioContextRef.current = new (window.AudioContext)();
         }
 
         const soundsToLoad: SoundType[] = Object.keys(soundDescriptions) as SoundType[];
