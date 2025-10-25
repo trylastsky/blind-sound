@@ -20,24 +20,87 @@ interface SoundTrainerProps {
 
 type ObstacleType = 'wall' | 'pillar' | 'corner' | 'tunnel' | 'maze' | 'none';
 
+// Интерфейс для настроек тренажера
+interface TrainerSettings {
+    difficulty: 'easy' | 'medium' | 'hard';
+    obstacleType: ObstacleType;
+    soundType: SoundType;
+    volume: number;
+}
+
+// Начальные настройки по умолчанию
+const defaultSettings: TrainerSettings = {
+    difficulty: 'easy',
+    obstacleType: 'none',
+    soundType: 'kalimba',
+    volume: 0.7
+};
+
 export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProps) {
     const [soundSource, setSoundSource] = useState<Point | null>(null);
     const [userGuess, setUserGuess] = useState<Point | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [showResult, setShowResult] = useState(false);
-    const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
-    const [obstacleType, setObstacleType] = useState<ObstacleType>('none');
-    const [soundType, setSoundType] = useState<SoundType>('kalimba');
-    const [volume, setVolume] = useState(0.7);
     const [statusFind, setStatusFind] = useState<boolean>(false);
+    
+    // Настройки с загрузкой из localStorage
+    const [settings, setSettings] = useState<TrainerSettings>(defaultSettings);
 
     const audioContextRef = useRef<AudioContext | null>(null);
     const soundBuffersRef = useRef<Map<SoundType, AudioBuffer>>(new Map());
     const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
+    const settingsRef = useRef(settings); // Ref для доступа к актуальным настройкам
 
     const canvasSize = 400;
     const center = canvasSize / 2;
     const radius = 150;
+
+    // Загрузка настроек из localStorage
+    useEffect(() => {
+        const savedSettings = localStorage.getItem('soundTrainerSettings');
+        if (savedSettings) {
+            try {
+                const parsedSettings = JSON.parse(savedSettings);
+                setSettings({
+                    ...defaultSettings,
+                    ...parsedSettings
+                });
+                settingsRef.current = {
+                    ...defaultSettings,
+                    ...parsedSettings
+                };
+            } catch (e) {
+                console.error('Error loading settings from localStorage:', e);
+            }
+        }
+    }, []);
+
+    // Обновление ref при изменении settings
+    useEffect(() => {
+        settingsRef.current = settings;
+    }, [settings]);
+
+    // Сохранение настроек в localStorage
+    useEffect(() => {
+        localStorage.setItem('soundTrainerSettings', JSON.stringify(settings));
+    }, [settings]);
+
+    // Функции для обновления настроек
+    const setDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
+        setSettings(prev => ({ ...prev, difficulty }));
+    };
+
+    const setObstacleType = (obstacleType: ObstacleType) => {
+        setSettings(prev => ({ ...prev, obstacleType }));
+    };
+
+    const setSoundType = (soundType: SoundType) => {
+        setSettings(prev => ({ ...prev, soundType }));
+    };
+
+    const setVolume = (volume: number) => {
+        setSettings(prev => ({ ...prev, volume }));
+    };
 
     const initAudio = useCallback(async () => {
         if (!audioContextRef.current) {
@@ -64,7 +127,6 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         setIsPlaying(false);
     }, []);
 
-
     const playSound = useCallback(async (point: Point) => {
         try {
             stopCurrentSound();
@@ -75,7 +137,9 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                 return;
             }
 
-            const buffer = soundBuffersRef.current.get(soundType);
+            const currentSettings = settingsRef.current; // Используем ref для актуальных настроек
+
+            const buffer = soundBuffersRef.current.get(currentSettings.soundType);
             if (!buffer) {
                 return;
             }
@@ -91,16 +155,16 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             panner.pan.value = pan;
 
             const gainNode = audioContextRef.current.createGain();
-            gainNode.gain.value = volume;
+            gainNode.gain.value = currentSettings.volume;
 
             source.connect(gainNode);
             gainNode.connect(panner);
             panner.connect(audioContextRef.current.destination);
 
-            if (obstacleType !== 'none') {
+            if (currentSettings.obstacleType !== 'none') {
                 const filter = audioContextRef.current.createBiquadFilter();
 
-                switch (obstacleType) {
+                switch (currentSettings.obstacleType) {
                     case 'wall':
                         filter.type = 'lowpass';
                         filter.frequency.value = 1500;
@@ -120,7 +184,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                         break;
                 }
 
-                if (obstacleType !== 'maze') {
+                if (currentSettings.obstacleType !== 'maze') {
                     gainNode.disconnect();
                     gainNode.connect(filter);
                     filter.connect(panner);
@@ -148,12 +212,13 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         } catch {
             setIsPlaying(false);
         }
-    }, [center, radius, soundType, volume, obstacleType, currentMode, initAudio, stopCurrentSound]);
+    }, [center, radius, currentMode, initAudio, stopCurrentSound]);
 
     const generateRandomPoint = useCallback((): Point => {
+        const currentSettings = settingsRef.current; // Используем ref для актуальных настроек
         const angle = Math.random() * 2 * Math.PI;
-        const distance = difficulty === 'easy' ? radius * 0.7 :
-            difficulty === 'medium' ? radius * 0.85 : radius;
+        const distance = currentSettings.difficulty === 'easy' ? radius * 0.7 :
+            currentSettings.difficulty === 'medium' ? radius * 0.85 : radius;
 
         const basePoint = {
             x: center + Math.cos(angle) * distance,
@@ -168,7 +233,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         }
 
         return basePoint;
-    }, [center, radius, difficulty, currentMode]);
+    }, [center, radius, currentMode]);
 
     const startNewRound = useCallback(() => {
         const newSource = generateRandomPoint();
@@ -221,8 +286,9 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             );
         }
 
-        const threshold = difficulty === 'easy' ? 50 :
-            difficulty === 'medium' ? 35 : 20;
+        const currentSettings = settingsRef.current; 
+        const threshold = currentSettings.difficulty === 'easy' ? 50 :
+            currentSettings.difficulty === 'medium' ? 35 : 20;
         const isCorrect = distance < threshold;
 
         setStats(prev => {
@@ -259,12 +325,14 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         stopCurrentSound();
     }, [stopCurrentSound]);
 
-    const drawObstacles = (ctx: CanvasRenderingContext2D) => {
+    const drawObstacles = useCallback((ctx: CanvasRenderingContext2D) => {
+        const currentSettings = settingsRef.current; // Используем ref для актуальных настроек
+        
         ctx.fillStyle = 'rgba(100, 100, 100, 0.7)';
         ctx.strokeStyle = 'rgba(150, 150, 150, 0.9)';
         ctx.lineWidth = 2;
 
-        switch (obstacleType) {
+        switch (currentSettings.obstacleType) {
             case 'wall':
                 ctx.fillRect(center - 80, center - 10, 160, 20);
                 break;
@@ -292,7 +360,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                 ctx.fillRect(center - 60, center + 10, 120, 20);
                 break;
         }
-    };
+    }, [center]);
 
     useEffect(() => {
         if (currentMode !== '2d') return;
@@ -319,7 +387,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         ctx.setLineDash([]);
 
         // Рисование препятствий
-        if (obstacleType !== 'none') {
+        if (settings.obstacleType !== 'none') {
             drawObstacles(ctx);
         }
 
@@ -349,7 +417,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             ctx.stroke();
             ctx.setLineDash([]);
         }
-    }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode, drawObstacles]);
+    }, [soundSource, userGuess, showResult, center, radius, settings.obstacleType, currentMode, drawObstacles]);
 
     const calculateDistanceInMeters = (point1: Point, point2: Point, is3D: boolean = false): number => {
         const pixelDistance = is3D && point1.z !== undefined && point2.z !== undefined
@@ -373,7 +441,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     <div>
                         <label className="block text-sm font-medium mb-2">Сложность</label>
                         <select
-                            value={difficulty}
+                            value={settings.difficulty}
                             onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
                             className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm"
                         >
@@ -386,7 +454,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     <div>
                         <label className="block text-sm font-medium mb-2">Тип звука</label>
                         <select
-                            value={soundType}
+                            value={settings.soundType}
                             onChange={(e) => setSoundType(e.target.value as SoundType)}
                             className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm"
                         >
@@ -401,7 +469,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     <div>
                         <label className="block text-sm font-medium mb-2">Препятствия</label>
                         <select
-                            value={obstacleType}
+                            value={settings.obstacleType}
                             onChange={(e) => setObstacleType(e.target.value as ObstacleType)}
                             className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm"
                         >
@@ -425,14 +493,14 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
 
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">
-                        Громкость: {Math.round(volume * 100)}%
+                        Громкость: {Math.round(settings.volume * 100)}%
                     </label>
                     <input
                         type="range"
                         min="0"
                         max="1"
                         step="0.1"
-                        value={volume}
+                        value={settings.volume}
                         onChange={(e) => setVolume(parseFloat(e.target.value))}
                         className="w-full h-2 bg-blue-700 rounded-lg appearance-none cursor-pointer"
                     />
@@ -440,10 +508,10 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
 
                 <div className="text-center text-blue-200 text-sm mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
-                        {descriptions.soundDescriptions[soundType].emoji} <strong>{descriptions.soundDescriptions[soundType].name}</strong> - {descriptions.soundDescriptions[soundType].desc}
+                        {descriptions.soundDescriptions[settings.soundType].emoji} <strong>{descriptions.soundDescriptions[settings.soundType].name}</strong> - {descriptions.soundDescriptions[settings.soundType].desc}
                     </div>
                     <div>
-                        {descriptions.obstacleDescriptions[obstacleType].emoji} <strong>{descriptions.obstacleDescriptions[obstacleType].name}</strong> - {descriptions.obstacleDescriptions[obstacleType].desc}
+                        {descriptions.obstacleDescriptions[settings.obstacleType].emoji} <strong>{descriptions.obstacleDescriptions[settings.obstacleType].name}</strong> - {descriptions.obstacleDescriptions[settings.obstacleType].desc}
                     </div>
                 </div>
 
@@ -498,7 +566,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                 </div>
             ) : (
                 <ThreeScene
-                    obstacleType={obstacleType}
+                    obstacleType={settings.obstacleType}
                     onPointSelect={handle3DPointSelect}
                     soundSource={showResult ? soundSource : null}
                     userGuess={userGuess}
@@ -524,7 +592,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                         {`✅ Можете кликать для указания источника звука`}
                     </p>
                 )}
-                {obstacleType !== 'none' && (
+                {settings.obstacleType !== 'none' && (
                     <p className="text-yellow-300 mt-2">
                         {`⚠️ Препятствия влияют на звук - слушайте внимательно!`}
                     </p>
