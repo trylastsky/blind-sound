@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import SoundTrainer from './components/SoundTrainer';
 import Stats from './components/Stats';
 import HelpModal from './components/helper/HelpModal';
+import { Headphones, Gamepad2, ChartArea, Axis3D } from 'lucide-react';
 
 export interface StatsData {
   totalAttempts: number;
@@ -69,31 +70,41 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 text-white">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Blind Sound</h1>
-          <p className="text-xl text-blue-200">Развивайте пространственный слух</p>
+          <h1 className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
+            Blind Sound
+          </h1>
+          <p className="text-xl text-blue-200 flex items-center justify-center gap-2">
+            <Headphones className="w-5 h-5" />
+            Развивайте пространственный слух
+          </p>
         </header>
 
         <nav className="flex justify-center mb-8">
           <div className="bg-blue-800 rounded-lg p-1 flex flex-wrap justify-center gap-2">
             <button
               onClick={() => setCurrentView('trainer')}
-              className={`px-4 py-2 rounded-md cursor-pointer transition-colors ${
+              className={`px-4 py-2 rounded-md cursor-pointer transition-colors flex items-center gap-2 ${
                 currentView === 'trainer' ? 'bg-blue-600 text-white' : 'text-blue-200'
               }`}
             >
+              <Gamepad2 className="w-4 h-4" />
               Тренажер
             </button>
             <button
               onClick={() => setCurrentView('stats')}
-              className={`px-4 py-2  rounded-md cursor-pointer transition-colors ${
+              className={`px-4 py-2 rounded-md cursor-pointer transition-colors flex items-center gap-2 ${
                 currentView === 'stats' ? 'bg-blue-600 text-white' : 'text-blue-200'
               }`}
             >
+              <ChartArea className="w-4 h-4" />
               Статистика
             </button>
             
             <div className="flex items-center space-x-2 ml-4">
-              <span className="text-blue-200">Режим:</span>
+              <span className="text-blue-200 flex items-center gap-1">
+                <Axis3D className="w-4 h-4" />
+                Режим:
+              </span>
               <select 
                 value={currentMode}
                 onChange={(e) => setCurrentMode(e.target.value as '2d' | '3d')}
