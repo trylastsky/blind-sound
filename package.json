@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "export": "next build && next export",
     "lint": "eslint"
   },
   "dependencies": {
     "@types/three": "^0.180.0",
-    "next": "16.0.0",
+    "next": "^16.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "three": "^0.180.0"

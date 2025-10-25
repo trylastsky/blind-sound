@@ -430,9 +430,14 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        // Полная очистка канваса
+        ctx.clearRect(0, 0, canvasSize, canvasSize);
+        
+        // Фон
         ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
         ctx.fillRect(0, 0, canvasSize, canvasSize);
 
+        // Рисование целевой области
         ctx.strokeStyle = '#4ade80';
         ctx.setLineDash([5, 5]);
         ctx.beginPath();
@@ -440,10 +445,12 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
         ctx.stroke();
         ctx.setLineDash([]);
 
+        // Рисование препятствий
         if (obstacleType !== 'none') {
             drawObstacles(ctx);
         }
 
+        // Рисование источника звука
         if (showResult && soundSource) {
             ctx.fillStyle = '#4ade80';
             ctx.beginPath();
@@ -451,6 +458,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             ctx.fill();
         }
 
+        // Рисование предположения пользователя
         if (userGuess) {
             ctx.fillStyle = showResult ? '#f87171' : '#60a5fa';
             ctx.beginPath();
@@ -458,6 +466,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             ctx.fill();
         }
 
+        // Рисование линий
         if (showResult && soundSource && userGuess) {
             ctx.strokeStyle = '#94a3b8';
             ctx.setLineDash([2, 2]);
@@ -467,7 +476,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             ctx.stroke();
             ctx.setLineDash([]);
         }
-    }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode]);
+        }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode]);
 
     const calculateDistanceInMeters = (point1: Point, point2: Point, is3D: boolean = false): number => {
         const pixelDistance = is3D && point1.z !== undefined && point2.z !== undefined
