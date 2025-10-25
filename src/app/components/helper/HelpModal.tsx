@@ -1,23 +1,17 @@
 'use client';
-import { JSX, useState } from 'react';
+import { useState } from 'react';
 import { get3DInstructions, getInstructions, obstacles, soundTypes } from './instructions';
 import { 
   HelpCircle, 
   X, 
-  Target, 
-  Ear, 
-  Gamepad2, 
-  Headphones,
   Volume2,
   ArrowDown,
   RefreshCw,
   ArrowUp,
-  Globe,
-  Square,
-  Music,
-  Moon,
+  BookOpenText,
   AudioLines,
-  BookOpenText
+  Headphones,
+  ToyBrick
 } from 'lucide-react';
 
 interface HelpModalProps {
@@ -40,25 +34,6 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
       );
     }
     return <p>{content}</p>;
-  };
-
-  const getIcon = (iconName: string) => {
-    const icons: { [key: string]: JSX.Element } = {
-      '🎯': <Target className="w-5 h-5" />,
-      '👂': <Ear className="w-5 h-5" />,
-      '🎮': <Gamepad2 className="w-5 h-5" />,
-      '🎧': <Headphones className="w-5 h-5" />,
-      '🌐': <Globe className="w-5 h-5" />,
-      '🎵': <Music className="w-5 h-5" />,
-      '🧱': <Square className="w-5 h-5" />,
-      '🎛️': <Volume2 className="w-5 h-5" />,
-      '🔊': <Volume2 className="w-5 h-5" />,
-      '🌙': <Moon className="w-5 h-5" />,
-      '👆': <ArrowUp className="w-5 h-5" />,
-      '🔄': <RefreshCw className="w-5 h-5" />,
-      '👇': <ArrowDown className="w-5 h-5" />
-    };
-    return icons[iconName] || <HelpCircle className="w-5 h-5" />;
   };
 
   return (
@@ -92,7 +67,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                   {instructions.slice(0, 2).map((section, index) => (
                     <div key={index} className="bg-blue-700 p-4 rounded-lg">
                       <h3 className={`text-lg font-semibold mb-2 ${section.color} flex items-center gap-2`}>
-                        {getIcon(section.icon)}
+                        {section.icon}
                         {section.title}
                       </h3>
                       {renderContent(section.content)}
@@ -101,14 +76,14 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
 
                   <div className="bg-blue-700 p-4 rounded-lg">
                     <h3 className="text-lg font-semibold mb-2 text-purple-400 flex items-center gap-2">
-                      <Music className="w-5 h-5" />
+                      {soundTypes.bell.icon}
                       Типы звуков
                     </h3>
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      {Object.entries(soundTypes).map(([key, { name }]) => (
+                      {Object.entries(soundTypes).map(([key, sound]) => (
                         <div key={key} className="flex items-center space-x-2">
-                          <Music className="w-4 h-4" />
-                          <span>{name}</span>
+                          {sound.icon}
+                          <span>{sound.name}</span>
                         </div>
                       ))}
                     </div>
@@ -119,7 +94,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                   {instructions.slice(2).map((section, index) => (
                     <div key={index} className="bg-blue-700 p-4 rounded-lg">
                       <h3 className={`text-lg font-semibold mb-2 ${section.color} flex items-center gap-2`}>
-                        {getIcon(section.icon)}
+                        {section.icon}
                         {section.title}
                       </h3>
                       {renderContent(section.content)}
@@ -128,15 +103,15 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
 
                   <div className="bg-blue-700 p-4 rounded-lg">
                     <h3 className="text-lg font-semibold mb-2 text-red-400 flex items-center gap-2">
-                      <Square className="w-5 h-5" />
+                      <ToyBrick className='w-4 h-4'/>
                       Препятствия
                     </h3>
                     <div className="space-y-2 text-sm">
-                      {Object.entries(obstacles).map(([key, { name, description }]) => (
+                      {Object.entries(obstacles).map(([key, obstacle]) => (
                         <div key={key} className="flex items-center space-x-2">
-                          <Square className="w-4 h-4" />
+                          {obstacle.icon}
                           <span>
-                            <strong>{name}</strong> - {description}
+                            <strong>{obstacle.name}</strong> - {obstacle.description}
                           </span>
                         </div>
                       ))}
@@ -169,7 +144,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
               {threeDInstructions && (
                 <div className="bg-purple-800 p-4 rounded-lg">
                   <h3 className={`text-lg font-semibold mb-3 text-center ${threeDInstructions.color} flex items-center justify-center gap-2`}>
-                    <Globe className="w-5 h-5" />
+                    {threeDInstructions.icon}
                     {threeDInstructions.title}
                   </h3>
                   <div className="text-center">
