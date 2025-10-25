@@ -20,7 +20,7 @@ interface SoundTrainerProps {
 
 type ObstacleType = 'wall' | 'pillar' | 'corner' | 'tunnel' | 'maze' | 'none';
 
-export default function SoundTrainer({setStats, currentMode }: SoundTrainerProps) {
+export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProps) {
     const [soundSource, setSoundSource] = useState<Point | null>(null);
     const [userGuess, setUserGuess] = useState<Point | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -58,7 +58,7 @@ export default function SoundTrainer({setStats, currentMode }: SoundTrainerProps
         if (currentSourceRef.current) {
             try {
                 currentSourceRef.current.stop();
-            } catch {}
+            } catch { }
             currentSourceRef.current = null;
         }
         setIsPlaying(false);
@@ -184,7 +184,7 @@ export default function SoundTrainer({setStats, currentMode }: SoundTrainerProps
 
     const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
         if (!statusFind || isPlaying) return;
-        
+
         const canvas = event.currentTarget;
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
@@ -194,7 +194,7 @@ export default function SoundTrainer({setStats, currentMode }: SoundTrainerProps
             x: (event.clientX - rect.left) * scaleX,
             y: (event.clientY - rect.top) * scaleY
         };
-        
+
         handleGuess(clickPoint);
     };
 
@@ -305,7 +305,7 @@ export default function SoundTrainer({setStats, currentMode }: SoundTrainerProps
 
         // Полная очистка канваса
         ctx.clearRect(0, 0, canvasSize, canvasSize);
-        
+
         // Фон
         ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
         ctx.fillRect(0, 0, canvasSize, canvasSize);
@@ -349,7 +349,7 @@ export default function SoundTrainer({setStats, currentMode }: SoundTrainerProps
             ctx.stroke();
             ctx.setLineDash([]);
         }
-        }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode, drawObstacles]);
+    }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode, drawObstacles]);
 
     const calculateDistanceInMeters = (point1: Point, point2: Point, is3D: boolean = false): number => {
         const pixelDistance = is3D && point1.z !== undefined && point2.z !== undefined
@@ -503,7 +503,7 @@ export default function SoundTrainer({setStats, currentMode }: SoundTrainerProps
                     soundSource={showResult ? soundSource : null}
                     userGuess={userGuess}
                     showResult={showResult}
-                    isInteractive={statusFind && !isPlaying} 
+                    isInteractive={statusFind && !isPlaying}
                 />
             )}
 

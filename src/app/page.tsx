@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import SoundTrainer from './components/SoundTrainer';
-import Instructions from './components/Instructions';
 import Stats from './components/Stats';
+import HelpModal from './components/helper/HelpModal';
 
 export interface StatsData {
   totalAttempts: number;
@@ -31,9 +31,11 @@ export default function Home() {
   const [stats, setStats] = useState<StatsData>(initialStats);
   const [currentMode, setCurrentMode] = useState<'2d' | '3d'>('2d');
 
-  // Загрузка статистики из localStorage
   useEffect(() => {
     const savedStats = localStorage.getItem('soundTrainerStats');
+    const savedView = localStorage.getItem('soundTrainerView');
+    const savedMode = localStorage.getItem('soundTrainerMode');
+
     if (savedStats) {
       try {
         setStats(JSON.parse(savedStats));
@@ -41,34 +43,41 @@ export default function Home() {
         console.error('Error loading stats from localStorage:', e);
       }
     }
+
+    if (savedView) {
+      setCurrentView(savedView as 'instructions' | 'trainer' | 'stats');
+    }
+
+    if (savedMode) {
+      setCurrentMode(savedMode as '2d' | '3d');
+    }
   }, []);
 
-  // Сохранение статистики в localStorage
   useEffect(() => {
     localStorage.setItem('soundTrainerStats', JSON.stringify(stats));
   }, [stats]);
+
+  useEffect(() => {
+    localStorage.setItem('soundTrainerView', currentView);
+  }, [currentView]);
+
+  useEffect(() => {
+    localStorage.setItem('soundTrainerMode', currentMode);
+  }, [currentMode]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 text-white">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2">Blind Sound</h1>
-          <p className="text-xl text-blue-200">Развивайте пространственный слух в 2D и 3D режимах</p>
+          <p className="text-xl text-blue-200">Развивайте пространственный слух</p>
         </header>
 
         <nav className="flex justify-center mb-8">
           <div className="bg-blue-800 rounded-lg p-1 flex flex-wrap justify-center gap-2">
             <button
-              onClick={() => setCurrentView('instructions')}
-              className={`px-4 py-2 rounded-md transition-colors ${
-                currentView === 'instructions' ? 'bg-blue-600 text-white' : 'text-blue-200'
-              }`}
-            >
-              Инструкция
-            </button>
-            <button
               onClick={() => setCurrentView('trainer')}
-              className={`px-4 py-2 rounded-md transition-colors ${
+              className={`px-4 py-2 rounded-md cursor-pointer transition-colors ${
                 currentView === 'trainer' ? 'bg-blue-600 text-white' : 'text-blue-200'
               }`}
             >
@@ -76,7 +85,7 @@ export default function Home() {
             </button>
             <button
               onClick={() => setCurrentView('stats')}
-              className={`px-4 py-2 rounded-md transition-colors ${
+              className={`px-4 py-2  rounded-md cursor-pointer transition-colors ${
                 currentView === 'stats' ? 'bg-blue-600 text-white' : 'text-blue-200'
               }`}
             >
@@ -96,8 +105,6 @@ export default function Home() {
             </div>
           </div>
         </nav>
-
-        {currentView === 'instructions' && <Instructions currentMode={currentMode} />}
         {currentView === 'trainer' && (
           <SoundTrainer 
             stats={stats} 
@@ -106,6 +113,8 @@ export default function Home() {
           />
         )}
         {currentView === 'stats' && <Stats stats={stats} currentMode={currentMode} />}
+        
+        <HelpModal currentMode={currentMode} />
       </div>
     </main>
   );

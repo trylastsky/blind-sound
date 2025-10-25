@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 
 interface Point {
@@ -14,7 +14,7 @@ interface ThreeSceneProps {
     soundSource: Point | null;
     userGuess: Point | null;
     showResult: boolean;
-    isInteractive:boolean;
+    isInteractive: boolean;
 }
 
 export default function ThreeScene({ obstacleType, onPointSelect, soundSource, userGuess, showResult, isInteractive }: ThreeSceneProps) {
@@ -26,11 +26,34 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
     const animationRef = useRef<number>(0);
 
     // Константы для координат (совпадают с 2D режимом)
-    const CANVAS_SIZE = 400; // Размер 2D канваса
-    const CANVAS_RADIUS = 150; // Радиус 2D канваса
-    const SCENE_RADIUS = 2.5; // Радиус 3D сцены
+    const CANVAS_SIZE = 400;
+    const CANVAS_RADIUS = 150;
+    const SCENE_RADIUS = 2.5;
 
-    const createObstacles = (scene: THREE.Scene) => {
+    // Преобразование из 2D координат канваса в 3D координаты сцены
+    const point2DTo3D = useCallback((point: Point): THREE.Vector3 => {
+        const centeredX = point.x - CANVAS_SIZE / 2;
+        const centeredY = point.y - CANVAS_SIZE / 2;
+
+        const scale = SCENE_RADIUS / CANVAS_RADIUS;
+        const x = centeredX * scale;
+        const z = centeredY * scale;
+        const y = 0.1;
+
+        return new THREE.Vector3(x, y, z);
+    }, []);
+
+    // Преобразование из 3D координат сцены в 2D координаты канваса
+    const point3DTo2D = useCallback((point: THREE.Vector3): Point => {
+        const scale = CANVAS_RADIUS / SCENE_RADIUS;
+        const x = point.x * scale + CANVAS_SIZE / 2;
+        const y = point.z * scale + CANVAS_SIZE / 2;
+
+        return { x, y, z: point.y };
+    }, []);
+
+    const createObstacles = useCallback((scene: THREE.Scene) => {
+        // Удаляем старые препятствия
         const obstacles: THREE.Object3D[] = [];
         scene.children.forEach(child => {
             if (child.userData?.isObstacle) {
@@ -115,33 +138,9 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
                 });
                 break;
         }
-    };
+    }, [obstacleType]);
 
-    // Преобразование из 2D координат канваса в 3D координаты сцены
-    const point2DTo3D = (point: Point): THREE.Vector3 => {
-        // Центрируем координаты относительно центра канваса
-        const centeredX = point.x - CANVAS_SIZE / 2;
-        const centeredY = point.y - CANVAS_SIZE / 2;
-        
-        // Масштабируем к радиусу сцены (без инверсии Y!)
-        const scale = SCENE_RADIUS / CANVAS_RADIUS;
-        const x = centeredX * scale;
-        const z = centeredY * scale; // Не инвертируем Y!
-        const y = 0.1; // Высота над полом
-        
-        return new THREE.Vector3(x, y, z);
-    };
-
-    // Преобразование из 3D координат сцены в 2D координаты канваса
-    const point3DTo2D = (point: THREE.Vector3): Point => {
-        const scale = CANVAS_RADIUS / SCENE_RADIUS;
-        const x = point.x * scale + CANVAS_SIZE / 2;
-        const y = point.z * scale + CANVAS_SIZE / 2; // Не инвертируем!
-        
-        return { x, y, z: point.y };
-    };
-
-    const updateMarkers = () => {
+    const updateMarkers = useCallback(() => {
         if (!sceneRef.current) return;
 
         // Удаляем старые маркеры
@@ -158,7 +157,7 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
             const sourceGeometry = new THREE.SphereGeometry(0.1);
             const sourceMaterial = new THREE.MeshPhongMaterial({ color: 0x4ade80 });
             const sourceMarker = new THREE.Mesh(sourceGeometry, sourceMaterial);
-            
+
             const sourcePos = point2DTo3D(soundSource);
             sourceMarker.position.copy(sourcePos);
             sourceMarker.userData = { isMarker: true };
@@ -178,7 +177,7 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
                 color: showResult ? 0xf87171 : 0x60a5fa
             });
             const guessMarker = new THREE.Mesh(guessGeometry, guessMaterial);
-            
+
             const guessPos = point2DTo3D(userGuess);
             guessMarker.position.copy(guessPos);
             guessMarker.userData = { isMarker: true };
@@ -200,7 +199,7 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
                 sceneRef.current.add(line);
             }
         }
-    };
+    }, [soundSource, userGuess, showResult, point2DTo3D]);
 
     useEffect(() => {
         if (!mountRef.current) return;
@@ -255,7 +254,7 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
 
         // Граница сцены
         const borderGeometry = new THREE.RingGeometry(SCENE_RADIUS - 0.02, SCENE_RADIUS, 32);
-        const borderMaterial = new THREE.MeshBasicMaterial({ 
+        const borderMaterial = new THREE.MeshBasicMaterial({
             color: 0x4ade80,
             side: THREE.DoubleSide,
             transparent: true,
@@ -299,7 +298,16 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
         const mouse = new THREE.Vector2();
 
         const handleClick = (event: MouseEvent) => {
-            if (!mountRef.current || !cameraRef.current || !floorRef.current ) return;
+            if (!isInteractive) {
+                console.log('Клик заблокирован - режим не интерактивный');
+                return;
+            }
+
+            if (!mountRef.current || !cameraRef.current || !floorRef.current) {
+                console.log('Клик заблокирован - нет необходимых ссылок');
+                return;
+            }
+
             const rect = mountRef.current.getBoundingClientRect();
             mouse.x = ((event.clientX - rect.left) / 500) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / 500) * 2 + 1;
@@ -311,7 +319,10 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
             if (intersects.length > 0) {
                 const point3D = intersects[0].point;
                 const point2D = point3DTo2D(point3D);
+                console.log('Клик обработан:', point2D);
                 onPointSelect(point2D);
+            } else {
+                console.log('Клик вне области пола');
             }
         };
 
@@ -334,22 +345,22 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
                 rendererRef.current.dispose();
             }
         };
-    }, []);
+    }, [createObstacles, point3DTo2D, onPointSelect, isInteractive]);
 
     useEffect(() => {
         if (sceneRef.current) {
             createObstacles(sceneRef.current);
         }
-    }, [createObstacles, obstacleType]);
+    }, [createObstacles]);
 
     useEffect(() => {
         updateMarkers();
-    }, [soundSource, userGuess, showResult, updateMarkers]);
+    }, [updateMarkers]);
 
     return (
         <div
             ref={mountRef}
-            className={`border-2 border-blue-600 rounded-lg bg-slate-800 ${isInteractive ? 'cursor-crosshair' :'cursor-not-allowed opacity-80'}`}
+            className={`border-2 border-blue-600 rounded-lg bg-slate-800 ${isInteractive ? 'cursor-crosshair hover:border-blue-500' : 'cursor-not-allowed opacity-80'}`}
             style={{ width: 500, height: 500 }}
         />
     );
