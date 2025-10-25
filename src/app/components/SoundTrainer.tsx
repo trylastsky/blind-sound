@@ -27,8 +27,6 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
     const [obstacleType, setObstacleType] = useState<ObstacleType>('none');
     const [soundType, setSoundType] = useState<SoundType>('kalimba');
     const [volume, setVolume] = useState(0.7);
-    const [hasInteracted, setHasInteracted] = useState(false);
-    const [threeSceneReady, setThreeSceneReady] = useState(false); // Новое состояние для готовности 3D сцены
 
     const audioContextRef = useRef<AudioContext | null>(null);
     const soundBuffersRef = useRef<Map<SoundType, AudioBuffer>>(new Map());
@@ -60,22 +58,19 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
         maze: { name: 'Лабиринт', emoji: '🌀', desc: 'Сложные отражения' }
     };
 
-    useEffect(() => {
-        const initAudioContext = async () => {
-            if (!audioContextRef.current) {
-                audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-            }
+    const initAudio = useCallback(async () => {
+        if (!audioContextRef.current) {
+            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
 
-            const soundsToLoad: SoundType[] = Object.keys(soundDescriptions) as SoundType[];
-            for (const type of soundsToLoad) {
-                if (!soundBuffersRef.current.has(type)) {
-                    const buffer = createFallbackSound(type);
-                    soundBuffersRef.current.set(type, buffer);
-                }
-            }
-        };
+        const soundsToLoad: SoundType[] = Object.keys(soundDescriptions) as SoundType[];
 
-        initAudioContext();
+        for (const type of soundsToLoad) {
+            if (!soundBuffersRef.current.has(type)) {
+                const buffer = createFallbackSound(type);
+                soundBuffersRef.current.set(type, buffer);
+            }
+        }
     }, []);
 
     const stopCurrentSound = useCallback(() => {
@@ -202,36 +197,36 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
         try {
             stopCurrentSound();
 
-            // Восстанавливаем аудиоконтекст если он был приостановлен
-            if (audioContextRef.current?.state === 'suspended') {
-                await audioContextRef.current.resume();
+            await initAudio();
+
+            if (!audioContextRef.current) {
+                return;
             }
 
             const buffer = soundBuffersRef.current.get(soundType);
             if (!buffer) {
-                console.error('Sound buffer not found');
                 return;
             }
 
-            const source = audioContextRef.current!.createBufferSource();
+            const source = audioContextRef.current.createBufferSource();
             source.buffer = buffer;
             currentSourceRef.current = source;
 
-            const panner = audioContextRef.current!.createStereoPanner();
+            const panner = audioContextRef.current.createStereoPanner();
 
             const normalizedX = (point.x - center) / radius;
             const pan = Math.max(-1, Math.min(1, normalizedX));
             panner.pan.value = pan;
 
-            const gainNode = audioContextRef.current!.createGain();
+            const gainNode = audioContextRef.current.createGain();
             gainNode.gain.value = volume;
 
             source.connect(gainNode);
             gainNode.connect(panner);
-            panner.connect(audioContextRef.current!.destination);
+            panner.connect(audioContextRef.current.destination);
 
             if (obstacleType !== 'none') {
-                const filter = audioContextRef.current!.createBiquadFilter();
+                const filter = audioContextRef.current.createBiquadFilter();
 
                 switch (obstacleType) {
                     case 'wall':
@@ -261,7 +256,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             }
 
             if (currentMode === '3d' && point.z !== undefined) {
-                const distanceGain = audioContextRef.current!.createGain();
+                const distanceGain = audioContextRef.current.createGain();
                 const distanceFactor = Math.max(0.3, 1 - Math.abs(point.z) * 0.5);
                 distanceGain.gain.value = distanceFactor;
 
@@ -279,10 +274,9 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             };
 
         } catch (error) {
-            console.error('Error playing sound:', error);
             setIsPlaying(false);
         }
-    }, [center, radius, soundType, volume, obstacleType, currentMode, stopCurrentSound]);
+    }, [center, radius, soundType, volume, obstacleType, currentMode, initAudio, stopCurrentSound]);
 
     const generateRandomPoint = useCallback((): Point => {
         const angle = Math.random() * 2 * Math.PI;
@@ -309,7 +303,6 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
         setSoundSource(newSource);
         setUserGuess(null);
         setShowResult(false);
-        setHasInteracted(false);
 
         setTimeout(() => {
             playSound(newSource);
@@ -317,7 +310,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
     }, [generateRandomPoint, playSound]);
 
     const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        if (isPlaying || (userGuess && hasInteracted) || !soundSource) return;
+        if (!soundSource || isPlaying) return;
 
         const canvas = event.currentTarget;
         const rect = canvas.getBoundingClientRect();
@@ -333,14 +326,13 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
     };
 
     const handle3DPointSelect = (point: Point) => {
-        if (isPlaying || (userGuess && hasInteracted) || !soundSource) return;
+        if (!soundSource || isPlaying) return;
         handleGuess(point);
     };
 
     const handleGuess = (guessPoint: Point) => {
         setUserGuess(guessPoint);
         setShowResult(true);
-        setHasInteracted(true);
 
         let distance: number;
         if (currentMode === '3d' && soundSource?.z !== undefined) {
@@ -484,7 +476,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             ctx.stroke();
             ctx.setLineDash([]);
         }
-    }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode]);
+        }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode]);
 
     const calculateDistanceInMeters = (point1: Point, point2: Point, is3D: boolean = false): number => {
         const pixelDistance = is3D && point1.z !== undefined && point2.z !== undefined
@@ -500,10 +492,6 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
 
         return pixelDistance * 0.02;
     };
-
-    const handleThreeSceneReady = useCallback(() => {
-        setThreeSceneReady(true);
-    }, []);
 
     return (
         <div className="flex flex-col items-center space-y-6">
@@ -556,11 +544,6 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                         <div className="text-xs text-blue-200">
                             Режим: <strong>{currentMode.toUpperCase()}</strong>
                         </div>
-                        {currentMode === '3d' && !threeSceneReady && (
-                            <div className="text-xs text-yellow-300">
-                                Загрузка 3D сцены...
-                            </div>
-                        )}
                     </div>
                 </div>
 
@@ -625,11 +608,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                         width={canvasSize}
                         height={canvasSize}
                         onClick={handleCanvasClick}
-                        className={`border-2 border-blue-600 rounded-lg bg-slate-800 transition-all hover:border-blue-500 ${
-                            (isPlaying || (userGuess && hasInteracted) || !soundSource) 
-                                ? 'cursor-not-allowed opacity-70' 
-                                : 'cursor-crosshair'
-                        }`}
+                        className="border-2 border-blue-600 rounded-lg cursor-crosshair bg-slate-800 transition-all hover:border-blue-500"
                         style={{ width: canvasSize, height: canvasSize }}
                     />
 
@@ -647,7 +626,6 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                     onPointSelect={handle3DPointSelect}
                     soundSource={showResult ? soundSource : null}
                     userGuess={userGuess}
-                    hasInteracted={hasInteracted}
                     showResult={showResult}
                 />
             )}
@@ -655,20 +633,13 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             <div className="text-center text-blue-200 max-w-md">
                 <p>
                     {currentMode === '3d'
-                        ? threeSceneReady 
-                            ? 'Кликните в 3D пространстве чтобы указать источник звука'
-                            : 'Загрузка 3D сцены...'
+                        ? 'Кликните в 3D пространстве чтобы указать источник звука'
                         : 'Кликните на круге в том месте, откуда, по вашему мнению, исходит звук'
                     }
                 </p>
                 {obstacleType !== 'none' && (
                     <p className="text-yellow-300 mt-2">
                         ⚠️ Препятствия влияют на звук - слушайте внимательно!
-                    </p>
-                )}
-                {(userGuess && hasInteracted) && (
-                    <p className="text-yellow-300 mt-2">
-                        ⚠️ Вы уже сделали предположение в этом раунде
                     </p>
                 )}
             </div>
