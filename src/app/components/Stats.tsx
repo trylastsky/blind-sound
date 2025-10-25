@@ -1,6 +1,7 @@
 'use client';
 import { StatsData } from '../page';
 import { useEffect, useRef } from 'react';
+import { Target, TrendingUp, Award, Zap, BarChart3, Crown } from 'lucide-react';
 
 interface StatsProps {
   stats: StatsData;
@@ -127,34 +128,50 @@ export default function Stats({ stats, currentMode }: StatsProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-blue-800 rounded-xl p-6">
-        <h2 className="text-3xl font-bold text-center mb-6">
+        <h2 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-3">
+          <BarChart3 className="w-8 h-8" />
           Статистика - Режим {currentMode.toUpperCase()}
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-blue-700 p-4 rounded-lg text-center">
-            <div className="text-2xl font-bold text-green-400">{modeStats.totalAttempts}</div>
+            <div className="text-2xl font-bold text-green-400 flex items-center justify-center gap-2">
+              <Target className="w-5 h-5" />
+              {modeStats.totalAttempts}
+            </div>
             <div className="text-blue-200">Всего попыток</div>
           </div>
 
           <div className="bg-blue-700 p-4 rounded-lg text-center">
-            <div className="text-2xl font-bold text-blue-400">{accuracy.toFixed(1)}%</div>
+            <div className="text-2xl font-bold text-blue-400 flex items-center justify-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              {accuracy.toFixed(1)}%
+            </div>
             <div className="text-blue-200">Точность</div>
           </div>
 
           <div className="bg-blue-700 p-4 rounded-lg text-center">
-            <div className="text-2xl font-bold text-yellow-400">{modeStats.currentStreak}</div>
+            <div className="text-2xl font-bold text-yellow-400 flex items-center justify-center gap-2">
+              <Zap className="w-5 h-5" />
+              {modeStats.currentStreak}
+            </div>
             <div className="text-blue-200">Текущая серия</div>
           </div>
 
           <div className="bg-blue-700 p-4 rounded-lg text-center">
-            <div className="text-2xl font-bold text-red-400">{modeStats.bestStreak}</div>
+            <div className="text-2xl font-bold text-red-400 flex items-center justify-center gap-2">
+              <Crown className="w-5 h-5" />
+              {modeStats.bestStreak}
+            </div>
             <div className="text-blue-200">Лучшая серия</div>
           </div>
         </div>
 
         <div className="bg-blue-900 rounded-lg p-6 mb-6">
-          <h3 className="text-xl font-semibold mb-4 text-center">📈 Уровень мастерства</h3>
+          <h3 className="text-xl font-semibold mb-4 text-center flex items-center justify-center gap-2">
+            <Award className="w-5 h-5" />
+            Уровень мастерства
+          </h3>
           <div className="text-center mb-4">
             <span className={`text-2xl font-bold ${currentLevel.color}`}>
               {currentLevel.name}

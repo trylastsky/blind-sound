@@ -83,29 +83,27 @@ export default function Home() {
           <div className="bg-blue-800 rounded-lg p-1 flex flex-wrap justify-center gap-2">
             <button
               onClick={() => setCurrentView('trainer')}
-              className={`px-4 py-2 rounded-md cursor-pointer transition-colors flex items-center gap-2 ${
-                currentView === 'trainer' ? 'bg-blue-600 text-white' : 'text-blue-200'
-              }`}
+              className={`px-4 py-2 rounded-md cursor-pointer transition-colors flex items-center gap-2 ${currentView === 'trainer' ? 'bg-blue-600 text-white' : 'text-blue-200'
+                }`}
             >
               <Gamepad2 className="w-4 h-4" />
               Тренажер
             </button>
             <button
               onClick={() => setCurrentView('stats')}
-              className={`px-4 py-2 rounded-md cursor-pointer transition-colors flex items-center gap-2 ${
-                currentView === 'stats' ? 'bg-blue-600 text-white' : 'text-blue-200'
-              }`}
+              className={`px-4 py-2 rounded-md cursor-pointer transition-colors flex items-center gap-2 ${currentView === 'stats' ? 'bg-blue-600 text-white' : 'text-blue-200'
+                }`}
             >
               <ChartArea className="w-4 h-4" />
               Статистика
             </button>
-            
+
             <div className="flex items-center space-x-2 ml-4">
               <span className="text-blue-200 flex items-center gap-1">
                 <Axis3D className="w-4 h-4" />
                 Режим:
               </span>
-              <select 
+              <select
                 value={currentMode}
                 onChange={(e) => setCurrentMode(e.target.value as '2d' | '3d')}
                 className="bg-blue-700 border border-blue-600 rounded-md px-3 py-1 text-white text-sm"
@@ -117,14 +115,14 @@ export default function Home() {
           </div>
         </nav>
         {currentView === 'trainer' && (
-          <SoundTrainer 
-            stats={stats} 
-            setStats={setStats} 
+          <SoundTrainer
+            stats={stats}
+            setStats={setStats}
             currentMode={currentMode}
           />
         )}
         {currentView === 'stats' && <Stats stats={stats} currentMode={currentMode} />}
-        
+
         <HelpModal currentMode={currentMode} />
       </div>
     </main>
