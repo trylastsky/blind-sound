@@ -14,15 +14,17 @@ interface ThreeSceneProps {
     soundSource: Point | null;
     userGuess: Point | null;
     showResult: boolean;
+    hasInteracted:boolean;
 }
 
-export default function ThreeScene({ obstacleType, onPointSelect, soundSource, userGuess, showResult }: ThreeSceneProps) {
+export default function ThreeScene({ obstacleType, onPointSelect, soundSource, userGuess, showResult,hasInteracted}: ThreeSceneProps) {
     const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
     const floorRef = useRef<THREE.Mesh | null>(null);
     const animationRef = useRef<number>(0);
+    const isInitializedRef = useRef(false); // Новый ref для отслеживания инициализации
 
     // Константы для координат (совпадают с 2D режимом)
     const CANVAS_SIZE = 400; // Размер 2D канваса
@@ -202,7 +204,8 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
     };
 
     useEffect(() => {
-        if (!mountRef.current) return;
+        if (!mountRef.current || isInitializedRef.current) return;
+        isInitializedRef.current = true;
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x1e293b);
@@ -265,31 +268,6 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
         border.position.y = 0.02;
         scene.add(border);
 
-        // Подписи осей для ориентации
-        const createAxisLabel = (text: string, position: THREE.Vector3) => {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d')!;
-            canvas.width = 128;
-            canvas.height = 64;
-            context.fillStyle = '#ffffff';
-            context.font = '24px Arial';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(text, 64, 32);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({ map: texture });
-            const sprite = new THREE.Sprite(material);
-            sprite.position.copy(position);
-            sprite.scale.set(0.5, 0.25, 1);
-            scene.add(sprite);
-        };
-
-        createAxisLabel('Перед', new THREE.Vector3(0, 0, -SCENE_RADIUS - 0.3));
-        createAxisLabel('Зад', new THREE.Vector3(0, 0, SCENE_RADIUS + 0.3));
-        createAxisLabel('Лево', new THREE.Vector3(-SCENE_RADIUS - 0.3, 0, 0));
-        createAxisLabel('Право', new THREE.Vector3(SCENE_RADIUS + 0.3, 0, 0));
-
         // Создаем препятствия
         createObstacles(scene);
 
@@ -333,6 +311,8 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
             if (rendererRef.current) {
                 rendererRef.current.dispose();
             }
+            
+            isInitializedRef.current = false;
         };
     }, []);
 
@@ -349,7 +329,7 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
     return (
         <div
             ref={mountRef}
-            className="border-2 border-blue-600 rounded-lg bg-slate-800 cursor-crosshair"
+            className={`border-2 border-blue-600 rounded-lg bg-slate-800 ${!hasInteracted ? 'cursor-crosshair': 'cursor-not-allowed opacity-70'}`}
             style={{ width: 500, height: 500 }}
         />
     );
