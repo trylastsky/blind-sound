@@ -2,6 +2,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { StatsData } from '../page';
 import ThreeScene from './ThreeScene';
+import { SoundType } from '../types/SoundType';
+import { createFallbackSound } from '../services/audio/createFallbackSound';
+import descriptions from "./descriptions.json";
 
 interface Point {
     x: number;
@@ -15,10 +18,9 @@ interface SoundTrainerProps {
     currentMode: '2d' | '3d';
 }
 
-type SoundType = 'bell' | 'chime' | 'kalimba' | 'marimba' | 'singingBowl' | 'guitar' | 'piano' | 'flute' | 'xylophone' | 'ocean';
 type ObstacleType = 'wall' | 'pillar' | 'corner' | 'tunnel' | 'maze' | 'none';
 
-export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrainerProps) {
+export default function SoundTrainer({setStats, currentMode }: SoundTrainerProps) {
     const [soundSource, setSoundSource] = useState<Point | null>(null);
     const [userGuess, setUserGuess] = useState<Point | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -27,6 +29,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
     const [obstacleType, setObstacleType] = useState<ObstacleType>('none');
     const [soundType, setSoundType] = useState<SoundType>('kalimba');
     const [volume, setVolume] = useState(0.7);
+    const [statusFind, setStatusFind] = useState<boolean>(false);
 
     const audioContextRef = useRef<AudioContext | null>(null);
     const soundBuffersRef = useRef<Map<SoundType, AudioBuffer>>(new Map());
@@ -36,38 +39,16 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
     const center = canvasSize / 2;
     const radius = 150;
 
-    const soundDescriptions = {
-        bell: { name: 'Колокольчик', emoji: '🔔', desc: 'Чистый и ясный' },
-        chime: { name: 'Ветерок', emoji: '🎐', desc: 'Нежный и воздушный' },
-        kalimba: { name: 'Калимба', emoji: '🎵', desc: 'Теплый и уютный' },
-        marimba: { name: 'Маримба', emoji: '🎹', desc: 'Насыщенный и глубокий' },
-        singingBowl: { name: 'Поющая чаша', emoji: '🪘', desc: 'Медитативный' },
-        guitar: { name: 'Гитара', emoji: '🎸', desc: 'Мягкий и гармоничный' },
-        piano: { name: 'Пианино', emoji: '🎹', desc: 'Классический и четкий' },
-        flute: { name: 'Флейта', emoji: '🎶', desc: 'Легкий и воздушный' },
-        xylophone: { name: 'Ксилофон', emoji: '🥁', desc: 'Яркий и ритмичный' },
-        ocean: { name: 'Океан', emoji: '🌊', desc: 'Естественный и успокаивающий' }
-    };
-
-    const obstacleDescriptions = {
-        none: { name: 'Без препятствий', emoji: '⚪', desc: 'Чистый звук' },
-        wall: { name: 'Стена', emoji: '🧱', desc: 'Частичная блокировка' },
-        pillar: { name: 'Колонна', emoji: '🪨', desc: 'Рассеивание звука' },
-        corner: { name: 'Угол', emoji: '📐', desc: 'Отражения' },
-        tunnel: { name: 'Тоннель', emoji: '🕳️', desc: 'Резонанс' },
-        maze: { name: 'Лабиринт', emoji: '🌀', desc: 'Сложные отражения' }
-    };
-
     const initAudio = useCallback(async () => {
         if (!audioContextRef.current) {
             audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         }
 
-        const soundsToLoad: SoundType[] = Object.keys(soundDescriptions) as SoundType[];
+        const soundsToLoad: SoundType[] = Object.keys(descriptions.soundDescriptions) as SoundType[];
 
         for (const type of soundsToLoad) {
             if (!soundBuffersRef.current.has(type)) {
-                const buffer = createFallbackSound(type);
+                const buffer = createFallbackSound(type, audioContextRef);
                 soundBuffersRef.current.set(type, buffer);
             }
         }
@@ -77,121 +58,12 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
         if (currentSourceRef.current) {
             try {
                 currentSourceRef.current.stop();
-            } catch (e) { }
+            } catch {}
             currentSourceRef.current = null;
         }
         setIsPlaying(false);
     }, []);
 
-    const createFallbackSound = (type: SoundType): AudioBuffer => {
-        if (!audioContextRef.current) throw new Error('AudioContext not initialized');
-
-        const context = audioContextRef.current;
-        const duration = type === 'ocean' ? 3 : 1.5;
-        const sampleRate = context.sampleRate;
-        const frameCount = sampleRate * duration;
-        const buffer = context.createBuffer(2, frameCount, sampleRate);
-
-        for (let channel = 0; channel < 2; channel++) {
-            const data = buffer.getChannelData(channel);
-
-            switch (type) {
-                case 'bell':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        const freq = 800 * Math.exp(-t * 2);
-                        data[i] = Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 8) * 0.5;
-                    }
-                    break;
-                case 'chime':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = (
-                            Math.sin(2 * Math.PI * 440 * t) * 0.3 +
-                            Math.sin(2 * Math.PI * 880 * t) * 0.2 +
-                            Math.sin(2 * Math.PI * 1320 * t) * 0.1
-                        ) * Math.exp(-t * 4) * 0.6;
-                    }
-                    break;
-                case 'kalimba':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = Math.sin(2 * Math.PI * 392 * t) *
-                            Math.exp(-t * 3) *
-                            (1 + 0.3 * Math.sin(2 * Math.PI * 5 * t)) * 0.4;
-                    }
-                    break;
-                case 'marimba':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = (
-                            Math.sin(2 * Math.PI * 261 * t) * 0.4 +
-                            Math.sin(2 * Math.PI * 523 * t) * 0.3 +
-                            Math.sin(2 * Math.PI * 784 * t) * 0.2
-                        ) * Math.exp(-t * 6) * 0.5;
-                    }
-                    break;
-                case 'singingBowl':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = Math.sin(2 * Math.PI * 110 * t) *
-                            Math.exp(-t * 1.5) *
-                            (1 + 0.2 * Math.sin(2 * Math.PI * 3 * t)) * 0.3;
-                    }
-                    break;
-                case 'guitar':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = (
-                            Math.sin(2 * Math.PI * 196 * t) * 0.3 +
-                            Math.sin(2 * Math.PI * 294 * t) * 0.2 +
-                            Math.sin(2 * Math.PI * 392 * t) * 0.1
-                        ) * Math.exp(-t * 4) * 0.5;
-                    }
-                    break;
-                case 'piano':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = (
-                            Math.sin(2 * Math.PI * 523 * t) * 0.4 +
-                            Math.sin(2 * Math.PI * 659 * t) * 0.3 +
-                            Math.sin(2 * Math.PI * 784 * t) * 0.2
-                        ) * Math.exp(-t * 5) * 0.4;
-                    }
-                    break;
-                case 'flute':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = Math.sin(2 * Math.PI * 880 * t) *
-                            (1 + 0.1 * Math.sin(2 * Math.PI * 5 * t)) *
-                            Math.exp(-t * 3) * 0.3;
-                    }
-                    break;
-                case 'xylophone':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = (
-                            Math.sin(2 * Math.PI * 1047 * t) * 0.3 +
-                            Math.sin(2 * Math.PI * 1319 * t) * 0.2 +
-                            Math.sin(2 * Math.PI * 1568 * t) * 0.1
-                        ) * Math.exp(-t * 8) * 0.6;
-                    }
-                    break;
-                case 'ocean':
-                    for (let i = 0; i < frameCount; i++) {
-                        const t = i / sampleRate;
-                        data[i] = (
-                            Math.sin(2 * Math.PI * 80 * t) * 0.1 +
-                            Math.sin(2 * Math.PI * 160 * t) * 0.05 +
-                            (Math.random() * 2 - 1) * 0.02
-                        ) * (0.7 + 0.3 * Math.sin(2 * Math.PI * 0.2 * t)) * 0.4;
-                    }
-                    break;
-            }
-        }
-
-        return buffer;
-    };
 
     const playSound = useCallback(async (point: Point) => {
         try {
@@ -273,7 +145,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                 currentSourceRef.current = null;
             };
 
-        } catch (error) {
+        } catch {
             setIsPlaying(false);
         }
     }, [center, radius, soundType, volume, obstacleType, currentMode, initAudio, stopCurrentSound]);
@@ -301,6 +173,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
     const startNewRound = useCallback(() => {
         const newSource = generateRandomPoint();
         setSoundSource(newSource);
+        setStatusFind(true);
         setUserGuess(null);
         setShowResult(false);
 
@@ -310,8 +183,8 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
     }, [generateRandomPoint, playSound]);
 
     const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!soundSource || isPlaying) return;
-
+        if (!statusFind || isPlaying) return;
+        
         const canvas = event.currentTarget;
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
@@ -321,18 +194,18 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             x: (event.clientX - rect.left) * scaleX,
             y: (event.clientY - rect.top) * scaleY
         };
-
+        
         handleGuess(clickPoint);
     };
 
     const handle3DPointSelect = (point: Point) => {
-        if (!soundSource || isPlaying) return;
         handleGuess(point);
     };
 
     const handleGuess = (guessPoint: Point) => {
         setUserGuess(guessPoint);
         setShowResult(true);
+        setStatusFind(false);
 
         let distance: number;
         if (currentMode === '3d' && soundSource?.z !== undefined) {
@@ -476,7 +349,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
             ctx.stroke();
             ctx.setLineDash([]);
         }
-        }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode]);
+        }, [soundSource, userGuess, showResult, center, radius, obstacleType, currentMode, drawObstacles]);
 
     const calculateDistanceInMeters = (point1: Point, point2: Point, is3D: boolean = false): number => {
         const pixelDistance = is3D && point1.z !== undefined && point2.z !== undefined
@@ -517,7 +390,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                             onChange={(e) => setSoundType(e.target.value as SoundType)}
                             className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm"
                         >
-                            {Object.entries(soundDescriptions).map(([key, { name, emoji }]) => (
+                            {Object.entries(descriptions.soundDescriptions).map(([key, { name, emoji }]) => (
                                 <option key={key} value={key}>
                                     {emoji} {name}
                                 </option>
@@ -532,7 +405,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                             onChange={(e) => setObstacleType(e.target.value as ObstacleType)}
                             className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm"
                         >
-                            {Object.entries(obstacleDescriptions).map(([key, { name, emoji }]) => (
+                            {Object.entries(descriptions.obstacleDescriptions).map(([key, { name, emoji }]) => (
                                 <option key={key} value={key}>
                                     {emoji} {name}
                                 </option>
@@ -543,6 +416,9 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                     <div className="flex flex-col justify-end space-y-2">
                         <div className="text-xs text-blue-200">
                             Режим: <strong>{currentMode.toUpperCase()}</strong>
+                        </div>
+                        <div className="text-xs text-blue-200">
+                            Статус: <strong>{statusFind ? '🔍 Поиск' : '⏳ Ожидание'}</strong>
                         </div>
                     </div>
                 </div>
@@ -564,10 +440,10 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
 
                 <div className="text-center text-blue-200 text-sm mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
-                        {soundDescriptions[soundType].emoji} <strong>{soundDescriptions[soundType].name}</strong> - {soundDescriptions[soundType].desc}
+                        {descriptions.soundDescriptions[soundType].emoji} <strong>{descriptions.soundDescriptions[soundType].name}</strong> - {descriptions.soundDescriptions[soundType].desc}
                     </div>
                     <div>
-                        {obstacleDescriptions[obstacleType].emoji} <strong>{obstacleDescriptions[obstacleType].name}</strong> - {obstacleDescriptions[obstacleType].desc}
+                        {descriptions.obstacleDescriptions[obstacleType].emoji} <strong>{descriptions.obstacleDescriptions[obstacleType].name}</strong> - {descriptions.obstacleDescriptions[obstacleType].desc}
                     </div>
                 </div>
 
@@ -608,7 +484,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                         width={canvasSize}
                         height={canvasSize}
                         onClick={handleCanvasClick}
-                        className="border-2 border-blue-600 rounded-lg cursor-crosshair bg-slate-800 transition-all hover:border-blue-500"
+                        className={`border-2 border-blue-600 rounded-lg ${statusFind ? 'cursor-crosshair' : 'cursor-not-allowed opacity-80'} bg-slate-800 transition-all hover:border-blue-500`}
                         style={{ width: canvasSize, height: canvasSize }}
                     />
 
@@ -627,6 +503,7 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                     soundSource={showResult ? soundSource : null}
                     userGuess={userGuess}
                     showResult={showResult}
+                    isInteractive={statusFind && !isPlaying} 
                 />
             )}
 
@@ -637,9 +514,19 @@ export default function SoundTrainer({ stats, setStats, currentMode }: SoundTrai
                         : 'Кликните на круге в том месте, откуда, по вашему мнению, исходит звук'
                     }
                 </p>
+                {!statusFind && (
+                    <p className="text-yellow-300 mt-2">
+                        {`⚠️ Нажмите "Новый звук" чтобы начать поиск`}
+                    </p>
+                )}
+                {statusFind && (
+                    <p className="text-green-300 mt-2">
+                        {`✅ Можете кликать для указания источника звука`}
+                    </p>
+                )}
                 {obstacleType !== 'none' && (
                     <p className="text-yellow-300 mt-2">
-                        ⚠️ Препятствия влияют на звук - слушайте внимательно!
+                        {`⚠️ Препятствия влияют на звук - слушайте внимательно!`}
                     </p>
                 )}
             </div>

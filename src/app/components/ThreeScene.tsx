@@ -14,9 +14,10 @@ interface ThreeSceneProps {
     soundSource: Point | null;
     userGuess: Point | null;
     showResult: boolean;
+    isInteractive:boolean;
 }
 
-export default function ThreeScene({ obstacleType, onPointSelect, soundSource, userGuess, showResult }: ThreeSceneProps) {
+export default function ThreeScene({ obstacleType, onPointSelect, soundSource, userGuess, showResult, isInteractive }: ThreeSceneProps) {
     const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -298,8 +299,7 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
         const mouse = new THREE.Vector2();
 
         const handleClick = (event: MouseEvent) => {
-            if (!mountRef.current || !cameraRef.current || !floorRef.current) return;
-
+            if (!mountRef.current || !cameraRef.current || !floorRef.current ) return;
             const rect = mountRef.current.getBoundingClientRect();
             mouse.x = ((event.clientX - rect.left) / 500) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / 500) * 2 + 1;
@@ -340,16 +340,16 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
         if (sceneRef.current) {
             createObstacles(sceneRef.current);
         }
-    }, [obstacleType]);
+    }, [createObstacles, obstacleType]);
 
     useEffect(() => {
         updateMarkers();
-    }, [soundSource, userGuess, showResult]);
+    }, [soundSource, userGuess, showResult, updateMarkers]);
 
     return (
         <div
             ref={mountRef}
-            className="border-2 border-blue-600 rounded-lg bg-slate-800 cursor-crosshair"
+            className={`border-2 border-blue-600 rounded-lg bg-slate-800 ${isInteractive ? 'cursor-crosshair' :'cursor-not-allowed opacity-80'}`}
             style={{ width: 500, height: 500 }}
         />
     );
