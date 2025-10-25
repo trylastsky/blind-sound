@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, JSX } from 'react';
 import { soundDescriptions, obstacleDescriptions } from "./descriptions";
 import { AlertTriangle, CheckCircle2, Hourglass, Play, Search, StopCircle, ChevronDown } from 'lucide-react';
 import { StatsData } from '@/app/page';

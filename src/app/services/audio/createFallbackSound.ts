@@ -5,7 +5,7 @@ export const createFallbackSound = (type: SoundType, audioContextRef: Context): 
     if (!audioContextRef.current) throw new Error('AudioContext not initialized');
 
     const context = audioContextRef.current;
-    const duration = type === 'ocean' ? 3 : 1.5;
+    const duration = type === 'ocean' ? 4 : type === 'wind' ? 3 : 1.5;
     const sampleRate = context.sampleRate;
     const frameCount = sampleRate * duration;
     const buffer = context.createBuffer(2, frameCount, sampleRate);
@@ -96,13 +96,42 @@ export const createFallbackSound = (type: SoundType, audioContextRef: Context): 
                 }
                 break;
             case 'ocean':
+                let lastOceanValue = 0;
+                const oceanFilter = 0.95;
+                
                 for (let i = 0; i < frameCount; i++) {
                     const t = i / sampleRate;
-                    data[i] = (
-                        Math.sin(2 * Math.PI * 80 * t) * 0.1 +
-                        Math.sin(2 * Math.PI * 160 * t) * 0.05 +
-                        (Math.random() * 2 - 1) * 0.02
-                    ) * (0.7 + 0.3 * Math.sin(2 * Math.PI * 0.2 * t)) * 0.4;
+                    const wave = Math.sin(2 * Math.PI * 0.3 * t) * 0.4;
+                    const noise = (Math.random() * 2 - 1);
+                    lastOceanValue = oceanFilter * lastOceanValue + (1 - oceanFilter) * noise;
+                    const splash = (Math.random() * 2 - 1) * Math.exp(-t * 0.5) * 0.2;
+                    const waveEnvelope = 0.6 + 0.3 * Math.sin(2 * Math.PI * 0.1 * t);
+                    const attackDecay = Math.min(t * 2, 1) * (1 - t / duration);
+                    
+                    data[i] = (wave + lastOceanValue * 0.5 + splash) * waveEnvelope * attackDecay * 0.4;
+                }
+                break;
+            case 'wind':
+                let lastWindValue = 0;
+                const windFilters = [0.92, 0.85];
+                let windPhase = 0;
+                
+                for (let i = 0; i < frameCount; i++) {
+                    const t = i / sampleRate;
+                    
+                    let windNoise = (Math.random() * 2 - 1);
+                    for (const filter of windFilters) {
+                        lastWindValue = filter * lastWindValue + (1 - filter) * windNoise;
+                        windNoise = lastWindValue;
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    windPhase += 0.15;
+                    const gust = Math.sin(2 * Math.PI * 0.08 * t + Math.sin(2 * Math.PI * 0.03 * t) * 2);
+                    const gustEnvelope = 0.7 + 0.3 * gust;
+                    const whistle = Math.sin(2 * Math.PI * 800 * t + Math.sin(2 * Math.PI * 5 * t) * 10) * 0.1;
+                    const envelope = Math.min(t * 3, 1) * (1 - t / duration);
+                    
+                    data[i] = (windNoise * gustEnvelope + whistle) * envelope * 0.3;
                 }
                 break;
         }
