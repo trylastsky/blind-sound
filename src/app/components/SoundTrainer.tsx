@@ -5,6 +5,7 @@ import ThreeScene from './ThreeScene';
 import { SoundType } from '../types/SoundType';
 import { createFallbackSound } from '../services/audio/createFallbackSound';
 import descriptions from "./descriptions.json";
+import { AlertTriangle, CheckCircle2, Hourglass, Play, Search, StopCircle } from 'lucide-react';
 
 interface Point {
     x: number;
@@ -486,7 +487,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                             Режим: <strong>{currentMode.toUpperCase()}</strong>
                         </div>
                         <div className="text-xs text-blue-200">
-                            Статус: <strong>{statusFind ? '🔍 Поиск' : '⏳ Ожидание'}</strong>
+                            Статус: <strong>{statusFind ? <span className='flex gap-1'><Search className='w-4 h-4'/>Поиск</span> :  <span className='flex gap-1'><Hourglass className='w-4 h-4'/>Ожидание</span>}</strong>
                         </div>
                     </div>
                 </div>
@@ -514,36 +515,37 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                         {descriptions.obstacleDescriptions[settings.obstacleType].emoji} <strong>{descriptions.obstacleDescriptions[settings.obstacleType].name}</strong> - {descriptions.obstacleDescriptions[settings.obstacleType].desc}
                     </div>
                 </div>
+                   </div>
 
                 <div className="flex space-x-4">
                     <button
                         onClick={startNewRound}
                         disabled={isPlaying}
-                        className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white font-semibold py-3 rounded-md transition-colors flex items-center justify-center space-x-2"
+                        className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white font-semibold py-3 rounded-md transition-colors flex items-center justify-center space-x-2 p-5"
                     >
                         {isPlaying ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                <span>Звук воспроизводится...</span>
-                            </>
+                        <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span>Звук воспроизводится...</span>
+                        </>
                         ) : (
-                            <>
-                                <span>🎵</span>
-                                <span>Новый звук</span>
-                            </>
+                        <>
+                            <Play className="w-4 h-4" />
+                            <span>Новый звук</span>
+                        </>
                         )}
                     </button>
 
                     {isPlaying && (
                         <button
-                            onClick={stopSound}
-                            className="px-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md transition-colors"
+                        onClick={stopSound}
+                        className="px-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md transition-colors flex items-center gap-2"
                         >
-                            ⏹️ Стоп
+                        <StopCircle className="w-4 h-4" />
+                        Стоп
                         </button>
                     )}
-                </div>
-            </div>
+                    </div>
 
             {currentMode === '2d' ? (
                 <div className="relative">
@@ -576,28 +578,25 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             )}
 
             <div className="text-center text-blue-200 max-w-md">
-                <p>
+                <p className="flex items-center justify-center gap-2">
                     {currentMode === '3d'
-                        ? 'Кликните в 3D пространстве чтобы указать источник звука'
-                        : 'Кликните на круге в том месте, откуда, по вашему мнению, исходит звук'
+                    ? 'Кликните в 3D пространстве чтобы указать источник звука'
+                    : 'Кликните на круге в том месте, откуда, по вашему мнению, исходит звук'
                     }
                 </p>
                 {!statusFind && (
-                    <p className="text-yellow-300 mt-2">
-                        {`⚠️ Нажмите "Новый звук" чтобы начать поиск`}
+                    <p className="text-yellow-300 mt-2 flex items-center justify-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    {`Нажмите "Новый звук" чтобы начать поиск`}
                     </p>
                 )}
                 {statusFind && (
-                    <p className="text-green-300 mt-2">
-                        {`✅ Можете кликать для указания источника звука`}
+                    <p className="text-green-300 mt-2 flex items-center justify-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Можете кликать для указания источника звука
                     </p>
                 )}
-                {settings.obstacleType !== 'none' && (
-                    <p className="text-yellow-300 mt-2">
-                        {`⚠️ Препятствия влияют на звук - слушайте внимательно!`}
-                    </p>
-                )}
-            </div>
+                </div>
         </div>
     );
 }
