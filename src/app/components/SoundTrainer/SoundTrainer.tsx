@@ -106,8 +106,14 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
     const [showResult, setShowResult] = useState(false);
     const [statusFind, setStatusFind] = useState<boolean>(false);
 
-    // Настройки с загрузкой из localStorage
-    const [settings, setSettings] = useState<TrainerSettings>(defaultSettings);
+    const [settings, setSettings] = useState<TrainerSettings>(() => {
+        const savedSettings = localStorage.getItem('soundTrainerSettings');
+        if(savedSettings) {
+            const parsedSettings = JSON.parse(savedSettings);
+            return parsedSettings;
+        }
+        else return defaultSettings;
+    });
 
     const audioContextRef = useRef<AudioContext | null>(null);
     const soundBuffersRef = useRef<Map<SoundType, AudioBuffer>>(new Map());
@@ -118,32 +124,10 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
     const center = canvasSize / 2;
     const radius = 150;
 
-    // Загрузка настроек из localStorage
-    useEffect(() => {
-        const savedSettings = localStorage.getItem('soundTrainerSettings');
-        if (savedSettings) {
-            try {
-                const parsedSettings = JSON.parse(savedSettings);
-                setSettings({
-                    ...defaultSettings,
-                    ...parsedSettings
-                });
-                settingsRef.current = {
-                    ...defaultSettings,
-                    ...parsedSettings
-                };
-            } catch (e) {
-                console.error('Error loading settings from localStorage:', e);
-            }
-        }
-    }, []);
-
-    // Обновление ref при изменении settings
     useEffect(() => {
         settingsRef.current = settings;
     }, [settings]);
 
-    // Сохранение настроек в localStorage
     useEffect(() => {
         localStorage.setItem('soundTrainerSettings', JSON.stringify(settings));
     }, [settings]);
