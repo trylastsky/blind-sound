@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import SoundTrainer from './components/SoundTrainer';
+import SoundTrainer from './components/SoundTrainer/SoundTrainer';
 import Stats from './components/Stats';
 import HelpModal from './components/helper/HelpModal';
 import { Headphones, Gamepad2, ChartArea, Axis3D } from 'lucide-react';

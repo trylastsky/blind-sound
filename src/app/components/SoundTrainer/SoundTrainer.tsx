@@ -1,11 +1,11 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { StatsData } from '../page';
-import ThreeScene from './ThreeScene';
-import { SoundType } from '../types/SoundType';
-import { createFallbackSound } from '../services/audio/createFallbackSound';
-import descriptions from "./descriptions.json";
-import { AlertTriangle, CheckCircle2, Hourglass, Play, Search, StopCircle } from 'lucide-react';
+import { soundDescriptions, obstacleDescriptions } from "./descriptions";
+import { AlertTriangle, CheckCircle2, Hourglass, Play, Search, StopCircle, ChevronDown } from 'lucide-react';
+import { StatsData } from '@/app/page';
+import { SoundType } from '@/app/types/SoundType';
+import { createFallbackSound } from '@/app/services/audio/createFallbackSound';
+import ThreeScene from '../ThreeScene';
 
 interface Point {
     x: number;
@@ -37,20 +37,82 @@ const defaultSettings: TrainerSettings = {
     volume: 0.7
 };
 
+// Кастомный компонент выпадающего списка с иконками
+interface CustomSelectProps {
+    value: string;
+    onChange: (value: string) => void;
+    options: Array<{ value: string; label: string; icon: JSX.Element }>;
+    className?: string;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, options, className }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const selectRef = useRef<HTMLDivElement>(null);
+
+    const selectedOption = options.find(opt => opt.value === value) || options[0];
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div ref={selectRef} className={`relative ${className}`}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm flex items-center justify-between hover:bg-blue-600 transition-colors"
+            >
+                <div className="flex items-center space-x-2">
+                    {selectedOption.icon}
+                    <span>{selectedOption.label}</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-blue-700 border border-blue-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {options.map((option) => (
+                        <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => {
+                                onChange(option.value);
+                                setIsOpen(false);
+                            }}
+                            className={`w-full px-3 py-2 text-sm text-left flex items-center space-x-2 hover:bg-blue-600 transition-colors ${option.value === value ? 'bg-blue-800' : ''
+                                }`}
+                        >
+                            {option.icon}
+                            <span>{option.label}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProps) {
     const [soundSource, setSoundSource] = useState<Point | null>(null);
     const [userGuess, setUserGuess] = useState<Point | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [statusFind, setStatusFind] = useState<boolean>(false);
-    
+
     // Настройки с загрузкой из localStorage
     const [settings, setSettings] = useState<TrainerSettings>(defaultSettings);
 
     const audioContextRef = useRef<AudioContext | null>(null);
     const soundBuffersRef = useRef<Map<SoundType, AudioBuffer>>(new Map());
     const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
-    const settingsRef = useRef(settings); // Ref для доступа к актуальным настройкам
+    const settingsRef = useRef(settings);
 
     const canvasSize = 400;
     const center = canvasSize / 2;
@@ -108,7 +170,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         }
 
-        const soundsToLoad: SoundType[] = Object.keys(descriptions.soundDescriptions) as SoundType[];
+        const soundsToLoad: SoundType[] = Object.keys(soundDescriptions) as SoundType[];
 
         for (const type of soundsToLoad) {
             if (!soundBuffersRef.current.has(type)) {
@@ -138,8 +200,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                 return;
             }
 
-            const currentSettings = settingsRef.current; // Используем ref для актуальных настроек
-
+            const currentSettings = settingsRef.current;
             const buffer = soundBuffersRef.current.get(currentSettings.soundType);
             if (!buffer) {
                 return;
@@ -150,7 +211,6 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             currentSourceRef.current = source;
 
             const panner = audioContextRef.current.createStereoPanner();
-
             const normalizedX = (point.x - center) / radius;
             const pan = Math.max(-1, Math.min(1, normalizedX));
             panner.pan.value = pan;
@@ -164,7 +224,6 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
 
             if (currentSettings.obstacleType !== 'none') {
                 const filter = audioContextRef.current.createBiquadFilter();
-
                 switch (currentSettings.obstacleType) {
                     case 'wall':
                         filter.type = 'lowpass';
@@ -216,7 +275,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
     }, [center, radius, currentMode, initAudio, stopCurrentSound]);
 
     const generateRandomPoint = useCallback((): Point => {
-        const currentSettings = settingsRef.current; // Используем ref для актуальных настроек
+        const currentSettings = settingsRef.current;
         const angle = Math.random() * 2 * Math.PI;
         const distance = currentSettings.difficulty === 'easy' ? radius * 0.7 :
             currentSettings.difficulty === 'medium' ? radius * 0.85 : radius;
@@ -287,7 +346,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             );
         }
 
-        const currentSettings = settingsRef.current; 
+        const currentSettings = settingsRef.current;
         const threshold = currentSettings.difficulty === 'easy' ? 50 :
             currentSettings.difficulty === 'medium' ? 35 : 20;
         const isCorrect = distance < threshold;
@@ -327,8 +386,8 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
     }, [stopCurrentSound]);
 
     const drawObstacles = useCallback((ctx: CanvasRenderingContext2D) => {
-        const currentSettings = settingsRef.current; // Используем ref для актуальных настроек
-        
+        const currentSettings = settingsRef.current;
+
         ctx.fillStyle = 'rgba(100, 100, 100, 0.7)';
         ctx.strokeStyle = 'rgba(150, 150, 150, 0.9)';
         ctx.lineWidth = 2;
@@ -372,14 +431,10 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // Полная очистка канваса
         ctx.clearRect(0, 0, canvasSize, canvasSize);
-
-        // Фон
         ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
         ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-        // Рисование целевой области
         ctx.strokeStyle = '#4ade80';
         ctx.setLineDash([5, 5]);
         ctx.beginPath();
@@ -387,12 +442,10 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Рисование препятствий
         if (settings.obstacleType !== 'none') {
             drawObstacles(ctx);
         }
 
-        // Рисование источника звука
         if (showResult && soundSource) {
             ctx.fillStyle = '#4ade80';
             ctx.beginPath();
@@ -400,7 +453,6 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             ctx.fill();
         }
 
-        // Рисование предположения пользователя
         if (userGuess) {
             ctx.fillStyle = showResult ? '#f87171' : '#60a5fa';
             ctx.beginPath();
@@ -408,7 +460,6 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             ctx.fill();
         }
 
-        // Рисование линий
         if (showResult && soundSource && userGuess) {
             ctx.strokeStyle = '#94a3b8';
             ctx.setLineDash([2, 2]);
@@ -435,51 +486,57 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         return pixelDistance * 0.02;
     };
 
+    // Подготовка опций для выпадающих списков
+    const soundOptions = Object.entries(soundDescriptions).map(([key, { icon, name }]) => ({
+        value: key,
+        label: name,
+        icon: icon
+    }));
+
+    const obstacleOptions = Object.entries(obstacleDescriptions).map(([key, { icon, name }]) => ({
+        value: key,
+        label: name,
+        icon: icon
+    }));
+
+    const difficultyOptions = [
+        { value: 'easy', label: 'Легкая', icon: <div className="w-4 h-4 bg-green-500 rounded-full" /> },
+        { value: 'medium', label: 'Средняя', icon: <div className="w-4 h-4 bg-yellow-500 rounded-full" /> },
+        { value: 'hard', label: 'Сложная', icon: <div className="w-4 h-4 bg-red-500 rounded-full" /> }
+    ];
+
     return (
         <div className="flex flex-col items-center space-y-6">
             <div className="bg-blue-800 rounded-lg p-4 w-full max-w-4xl">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div>
                         <label className="block text-sm font-medium mb-2">Сложность</label>
-                        <select
+                        <CustomSelect
                             value={settings.difficulty}
-                            onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
-                            className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm"
-                        >
-                            <option value="easy">Легкая</option>
-                            <option value="medium">Средняя</option>
-                            <option value="hard">Сложная</option>
-                        </select>
+                            onChange={(value) => setDifficulty(value as 'easy' | 'medium' | 'hard')}
+                            options={difficultyOptions}
+                            className="w-full"
+                        />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium mb-2">Тип звука</label>
-                        <select
+                        <CustomSelect
                             value={settings.soundType}
-                            onChange={(e) => setSoundType(e.target.value as SoundType)}
-                            className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm"
-                        >
-                            {Object.entries(descriptions.soundDescriptions).map(([key, { name, emoji }]) => (
-                                <option key={key} value={key}>
-                                    {emoji} {name}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(value) => setSoundType(value as SoundType)}
+                            options={soundOptions}
+                            className="w-full"
+                        />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium mb-2">Препятствия</label>
-                        <select
+                        <CustomSelect
                             value={settings.obstacleType}
-                            onChange={(e) => setObstacleType(e.target.value as ObstacleType)}
-                            className="w-full bg-blue-700 border border-blue-600 rounded-md px-3 py-2 text-white text-sm"
-                        >
-                            {Object.entries(descriptions.obstacleDescriptions).map(([key, { name, emoji }]) => (
-                                <option key={key} value={key}>
-                                    {emoji} {name}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(value) => setObstacleType(value as ObstacleType)}
+                            options={obstacleOptions}
+                            className="w-full"
+                        />
                     </div>
 
                     <div className="flex flex-col justify-end space-y-2">
@@ -487,7 +544,12 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                             Режим: <strong>{currentMode.toUpperCase()}</strong>
                         </div>
                         <div className="text-xs text-blue-200">
-                            Статус: <strong>{statusFind ? <span className='flex gap-1'><Search className='w-4 h-4'/>Поиск</span> :  <span className='flex gap-1'><Hourglass className='w-4 h-4'/>Ожидание</span>}</strong>
+                            Статус: <strong>
+                                {statusFind ?
+                                    <span className='flex gap-1'><Search className='w-4 h-4' />Поиск</span> :
+                                    <span className='flex gap-1'><Hourglass className='w-4 h-4' />Ожидание</span>
+                                }
+                            </strong>
                         </div>
                     </div>
                 </div>
@@ -508,14 +570,19 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                 </div>
 
                 <div className="text-center text-blue-200 text-sm mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div>
-                        {descriptions.soundDescriptions[settings.soundType].emoji} <strong>{descriptions.soundDescriptions[settings.soundType].name}</strong> - {descriptions.soundDescriptions[settings.soundType].desc}
+                    <div className="flex items-center justify-center gap-2">
+                        {soundDescriptions[settings.soundType].icon}
+                        <div>
+                            <strong>{soundDescriptions[settings.soundType].name}</strong> - {soundDescriptions[settings.soundType].desc}
+                        </div>
                     </div>
-                    <div>
-                        {descriptions.obstacleDescriptions[settings.obstacleType].emoji} <strong>{descriptions.obstacleDescriptions[settings.obstacleType].name}</strong> - {descriptions.obstacleDescriptions[settings.obstacleType].desc}
+                    <div className="flex items-center justify-center gap-2">
+                        {obstacleDescriptions[settings.obstacleType].icon}
+                        <div>
+                            <strong>{obstacleDescriptions[settings.obstacleType].name}</strong> - {obstacleDescriptions[settings.obstacleType].desc}
+                        </div>
                     </div>
                 </div>
-                   </div>
 
                 <div className="flex space-x-4">
                     <button
@@ -524,28 +591,29 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                         className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white font-semibold py-3 rounded-md transition-colors flex items-center justify-center space-x-2 p-5"
                     >
                         {isPlaying ? (
-                        <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            <span>Звук воспроизводится...</span>
-                        </>
+                            <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span>Звук воспроизводится...</span>
+                            </>
                         ) : (
-                        <>
-                            <Play className="w-4 h-4" />
-                            <span>Новый звук</span>
-                        </>
+                            <>
+                                <Play className="w-4 h-4" />
+                                <span>Новый звук</span>
+                            </>
                         )}
                     </button>
 
                     {isPlaying && (
                         <button
-                        onClick={stopSound}
-                        className="px-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md transition-colors flex items-center gap-2"
+                            onClick={stopSound}
+                            className="px-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md transition-colors flex items-center gap-2"
                         >
-                        <StopCircle className="w-4 h-4" />
-                        Стоп
+                            <StopCircle className="w-4 h-4" />
+                            Стоп
                         </button>
                     )}
-                    </div>
+                </div>
+            </div>
 
             {currentMode === '2d' ? (
                 <div className="relative">
@@ -580,23 +648,23 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
             <div className="text-center text-blue-200 max-w-md">
                 <p className="flex items-center justify-center gap-2">
                     {currentMode === '3d'
-                    ? 'Кликните в 3D пространстве чтобы указать источник звука'
-                    : 'Кликните на круге в том месте, откуда, по вашему мнению, исходит звук'
+                        ? 'Кликните в 3D пространстве чтобы указать источник звука'
+                        : 'Кликните на круге в том месте, откуда, по вашему мнению, исходит звук'
                     }
                 </p>
                 {!statusFind && (
                     <p className="text-yellow-300 mt-2 flex items-center justify-center gap-2">
-                    <AlertTriangle className="w-4 h-4" />
-                    {`Нажмите "Новый звук" чтобы начать поиск`}
+                        <AlertTriangle className="w-4 h-4" />
+                        {`Нажмите "Новый звук" чтобы начать поиск`}
                     </p>
                 )}
                 {statusFind && (
                     <p className="text-green-300 mt-2 flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Можете кликать для указания источника звука
+                        <CheckCircle2 className="w-4 h-4" />
+                        Можете кликать для указания источника звука
                     </p>
                 )}
-                </div>
+            </div>
         </div>
     );
 }
