@@ -4,14 +4,10 @@ import { useEffect, useRef } from 'react';
 import {
 	Target,
 	TrendingUp,
-	Award,
 	Zap,
 	BarChart3,
 	Crown,
-	Rocket,
-	Star,
 	Trophy,
-	TrendingDown,
 	Users,
 	Activity,
 	ChartPie
@@ -186,7 +182,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 
 	return (
 		<div className="max-w-6xl mx-auto space-y-8 p-4">
-			<div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
+			<div className="bg-linear-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
 				<div className="text-center mb-8">
 					<h2 className="text-4xl font-bold bg-linear-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-3">
 						Статистика Тренировок
@@ -198,7 +194,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 				</div>
 
 				<div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-					<div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-green-500/50 transition-all duration-300 group">
+					<div className="bg-linear-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-green-500/50 transition-all duration-300 group">
 						<div className="text-3xl font-bold text-green-400 flex items-center justify-center gap-3 mb-3 group-hover:scale-110 transition-transform">
 							<Target className="w-8 h-8" />
 							{modeStats.totalAttempts}
@@ -207,7 +203,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 						<div className="text-green-300 text-sm mt-1">Активность</div>
 					</div>
 
-					<div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-blue-500/50 transition-all duration-300 group">
+					<div className="bg-linear-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-blue-500/50 transition-all duration-300 group">
 						<div className="text-3xl font-bold text-blue-400 flex items-center justify-center gap-3 mb-3 group-hover:scale-110 transition-transform">
 							<TrendingUp className="w-8 h-8" />
 							{accuracy.toFixed(1)}%
@@ -216,7 +212,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 						<div className="text-blue-300 text-sm mt-1">Эффективность</div>
 					</div>
 
-					<div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-yellow-500/50 transition-all duration-300 group">
+					<div className="bg-linear-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-yellow-500/50 transition-all duration-300 group">
 						<div className="text-3xl font-bold text-yellow-400 flex items-center justify-center gap-3 mb-3 group-hover:scale-110 transition-transform">
 							<Zap className="w-8 h-8" />
 							{modeStats.currentStreak}
@@ -225,7 +221,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 						<div className="text-yellow-300 text-sm mt-1">Моментальный успех</div>
 					</div>
 
-					<div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-red-500/50 transition-all duration-300 group">
+					<div className="bg-linear-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-red-500/50 transition-all duration-300 group">
 						<div className="text-3xl font-bold text-red-400 flex items-center justify-center gap-3 mb-3 group-hover:scale-110 transition-transform">
 							<Crown className="w-8 h-8" />
 							{modeStats.bestStreak}
@@ -269,14 +265,14 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 				</div>
 			</div>
 
-			<div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
+			<div className="bg-linear-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
 				<h3 className="text-3xl font-bold text-center mb-8 text-white flex items-center justify-center gap-3">
 					<Activity className="w-8 h-8 text-green-400" />
 					Анализ Эффективности
 				</h3>
 
 				<div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-					<div className="flex-1 bg-gradient-to-br from-blue-900/30 to-purple-900/30 p-6 rounded-2xl border-2 border-blue-500/20">
+					<div className="flex-1 bg-linear-to-br from-blue-900/30 to-purple-900/30 p-6 rounded-2xl border-2 border-blue-500/20">
 						<div className="text-center mb-4">
 							<h4><span className='text-xl font-bold text-white mb-2 flex items-center justify-center gap-2'><ChartPie className='h-6 w-6' />Визуализация Результатов</span></h4>
 							<p className="text-blue-300">Общая статистика точности</p>
@@ -285,11 +281,11 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 							ref={canvasRef}
 							width={400}
 							height={350}
-							className="w-full max-w-md mx-auto bg-gradient-to-br from-blue-900/20 to-purple-900/20 rounded-xl p-4 border border-blue-500/10"
+							className="w-full max-w-md mx-auto bg-linear-to-br from-blue-900/20 to-purple-900/20 rounded-xl p-4 border border-blue-500/10"
 						/>
 					</div>
 
-					<div className="flex-1 bg-gradient-to-br from-purple-900/30 to-blue-900/30 p-6 rounded-2xl border-2 border-purple-500/20">
+					<div className="flex-1 bg-linear-to-br from-purple-900/30 to-blue-900/30 p-6 rounded-2xl border-2 border-purple-500/20">
 						<h4 className="text-2xl font-bold text-center mb-6 text-white flex items-center justify-center gap-2">
 							<Users className="w-6 h-6" />
 							Сводка Производительности
@@ -318,14 +314,14 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 				</div>
 			</div>
 
-			<div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
+			<div className="bg-linear-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
 				<h3 className="text-3xl font-bold text-center mb-8 text-white flex items-center justify-center gap-3">
 					<TrendingUp className="w-8 h-8 text-green-400" />
 					Сравнение Режимов
 				</h3>
 
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-					<div className="bg-gradient-to-br from-green-900/30 to-blue-900/30 p-6 rounded-2xl border-2 border-green-500/30 hover:border-green-400/50 transition-all group">
+					<div className="bg-linear-to-br from-green-900/30 to-blue-900/30 p-6 rounded-2xl border-2 border-green-500/30 hover:border-green-400/50 transition-all group">
 						<h4 className="text-2xl font-bold mb-4 text-green-400 flex items-center gap-3">
 							<div className="p-2 bg-green-500/20 rounded-lg">
 								<span>🎯</span>
@@ -348,7 +344,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 						</div>
 					</div>
 
-					<div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 p-6 rounded-2xl border-2 border-purple-500/30 hover:border-purple-400/50 transition-all group">
+					<div className="bg-linear-to-br from-purple-900/30 to-pink-900/30 p-6 rounded-2xl border-2 border-purple-500/30 hover:border-purple-400/50 transition-all group">
 						<h4 className="text-2xl font-bold mb-4 text-purple-400 flex items-center gap-3">
 							<div className="p-2 bg-purple-500/20 rounded-lg">
 								<span>🎮</span>

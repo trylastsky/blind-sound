@@ -1,0 +1,1 @@
+export type ObstacleType = 'wall' | 'pillar' | 'corner' | 'tunnel' | 'maze' | 'none';

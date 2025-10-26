@@ -1,4 +1,4 @@
-import { SoundType } from "@/app/types/SoundType";
+import { SoundType } from "@/app/types/audio/SoundType";
 import { Context } from "vm";
 
 export const createFallbackSound = (type: SoundType, audioContextRef: Context): AudioBuffer => {

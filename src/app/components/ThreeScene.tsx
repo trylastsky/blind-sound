@@ -339,8 +339,8 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
 
         return () => {
             cancelAnimationFrame(animationRef.current);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             mountRef.current?.removeEventListener('click', handleClick);
-
             if (rendererRef.current) {
                 rendererRef.current.dispose();
             }

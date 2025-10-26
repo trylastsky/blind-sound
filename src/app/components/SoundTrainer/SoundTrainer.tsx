@@ -3,31 +3,18 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { soundDescriptions, obstacleDescriptions } from "./descriptions";
 import { AlertTriangle, AudioWaveform, Box, Boxes, CheckCircle2, DraftingCompass, Hourglass, Play, Ruler, Search, Square, StopCircle, TriangleRight } from 'lucide-react';
 import { StatsData } from '@/app/page';
-import { SoundType } from '@/app/types/SoundType';
+import { SoundType } from '@/app/types/audio/SoundType';
 import { createFallbackSound } from '@/app/services/audio/createFallbackSound';
 import ThreeScene from '../ThreeScene';
 import { CustomSelect } from '../CustomSelect';
-
-interface Point {
-    x: number;
-    y: number;
-    z?: number;
-}
+import { Point } from '@/app/types/canvas/Point';
+import { TrainerSettings } from '@/app/types/settings/TrainerSettings';
+import { ObstacleType } from '@/app/types/canvas/Obstacle';
 
 interface SoundTrainerProps {
     stats: StatsData;
     setStats: (stats: StatsData | ((prev: StatsData) => StatsData)) => void;
     currentMode: '2d' | '3d';
-}
-
-type ObstacleType = 'wall' | 'pillar' | 'corner' | 'tunnel' | 'maze' | 'none';
-
-// Интерфейс для настроек тренажера
-interface TrainerSettings {
-    difficulty: 'easy' | 'medium' | 'hard';
-    obstacleType: ObstacleType;
-    soundType: SoundType;
-    volume: number;
 }
 
 // Начальные настройки по умолчанию
