@@ -3,13 +3,14 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { soundDescriptions, obstacleDescriptions } from "./descriptions";
 import { AlertTriangle, AudioWaveform, Box, Boxes, CheckCircle2, DraftingCompass, Hourglass, Play, Ruler, Search, Square, StopCircle, TriangleRight } from 'lucide-react';
 import { StatsData } from '@/app/page';
-import { SoundType } from '@/app/types/audio/SoundType';
 import { createFallbackSound } from '@/app/services/audio/createFallbackSound';
 import ThreeScene from '../ThreeScene';
 import { CustomSelect } from '../CustomSelect';
 import { Point } from '@/app/types/canvas/Point';
 import { TrainerSettings } from '@/app/types/settings/TrainerSettings';
+import { SoundType } from '@/app/types/audio/SoundType';
 import { ObstacleType } from '@/app/types/canvas/Obstacle';
+import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 
 interface SoundTrainerProps {
     stats: StatsData;
@@ -25,22 +26,16 @@ const defaultSettings: TrainerSettings = {
     volume: 0.7
 };
 
-
 export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProps) {
     const [soundSource, setSoundSource] = useState<Point | null>(null);
     const [userGuess, setUserGuess] = useState<Point | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [statusFind, setStatusFind] = useState<boolean>(false);
-
-    const [settings, setSettings] = useState<TrainerSettings>(() => {
-        const savedSettings = localStorage.getItem('soundTrainerSettings');
-        if (savedSettings) {
-            const parsedSettings = JSON.parse(savedSettings);
-            return parsedSettings;
-        }
-        else return defaultSettings;
-    });
+    const [settings, setSettings, isSettingsLoaded] = useLocalStorage<TrainerSettings>(
+        'soundTrainerSettings', 
+        defaultSettings
+    );
 
     const audioContextRef = useRef<AudioContext | null>(null);
     const soundBuffersRef = useRef<Map<SoundType, AudioBuffer>>(new Map());
@@ -53,10 +48,6 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
 
     useEffect(() => {
         settingsRef.current = settings;
-    }, [settings]);
-
-    useEffect(() => {
-        localStorage.setItem('soundTrainerSettings', JSON.stringify(settings));
     }, [settings]);
 
     // Функции для обновления настроек
@@ -414,6 +405,17 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
         { value: 'medium', label: 'Средняя', icon: <div className="w-4 h-4 bg-yellow-500 rounded-full" /> },
         { value: 'hard', label: 'Сложная', icon: <div className="w-4 h-4 bg-red-500 rounded-full" /> }
     ];
+
+    if (!isSettingsLoaded) {
+        return (
+            <div className="flex flex-col items-center justify-center space-y-8">
+                <div className="bg-linear-to-br from-gray-900 via-blue-900 to-purple-900 rounded-2xl p-8 w-full max-w-4xl border-2 border-purple-500/30 shadow-2xl text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                    <p className="text-blue-200">Загрузка настроек...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center space-y-8">
