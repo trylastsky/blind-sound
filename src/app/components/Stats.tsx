@@ -1,305 +1,388 @@
 'use client';
 import { StatsData } from '../page';
 import { useEffect, useRef } from 'react';
-import { Target, TrendingUp, Award, Zap, BarChart3, Crown } from 'lucide-react';
+import {
+	Target,
+	TrendingUp,
+	Award,
+	Zap,
+	BarChart3,
+	Crown,
+	Rocket,
+	Star,
+	Trophy,
+	TrendingDown,
+	Users,
+	Activity,
+	ChartPie
+} from 'lucide-react';
 
 interface StatsProps {
-  stats: StatsData;
-  currentMode: '2d' | '3d';
+	stats: StatsData;
+	currentMode: '2d' | '3d';
 }
 
 export default function Stats({ stats, currentMode }: StatsProps) {
-  const modeStats = stats.modeStats[currentMode];
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+	const modeStats = stats.modeStats[currentMode];
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const accuracy = modeStats.totalAttempts > 0
-    ? (modeStats.correctAttempts / modeStats.totalAttempts) * 100
-    : 0;
+	const accuracy = modeStats.totalAttempts > 0
+		? (modeStats.correctAttempts / modeStats.totalAttempts) * 100
+		: 0;
 
-  const totalAccuracy = stats.totalAttempts > 0
-    ? (stats.correctAttempts / stats.totalAttempts) * 100
-    : 0;
+	const totalAccuracy = stats.totalAttempts > 0
+		? (stats.correctAttempts / stats.totalAttempts) * 100
+		: 0;
 
-  const getLevel = (acc: number) => {
-    if (acc >= 85) return { name: 'Эксперт', color: 'text-red-400', bg: 'bg-red-500' };
-    if (acc >= 60) return { name: 'Опытный', color: 'text-yellow-400', bg: 'bg-yellow-500' };
-    if (acc >= 30) return { name: 'Новичок', color: 'text-green-400', bg: 'bg-green-500' };
-    return { name: 'Начинающий', color: 'text-blue-400', bg: 'bg-blue-500' };
-  };
+	const getLevel = (acc: number) => {
+		if (acc >= 85) return {
+			name: 'Мастер Эхолокации',
+			color: 'text-red-300',
+			bg: 'bg-gradient-to-r from-red-500 to-pink-600',
+			icon: '🏆',
+			description: 'Превосходное чувство пространства!'
+		};
+		if (acc >= 60) return {
+			name: 'Опытный Навигатор',
+			color: 'text-yellow-300',
+			bg: 'bg-gradient-to-r from-yellow-500 to-orange-600',
+			icon: '⭐',
+			description: 'Отличные результаты!'
+		};
+		if (acc >= 30) return {
+			name: 'Уверенный Новичок',
+			color: 'text-green-300',
+			bg: 'bg-gradient-to-r from-green-500 to-emerald-600',
+			icon: '🚀',
+			description: 'Хороший прогресс!'
+		};
+		return {
+			name: 'Начинающий Искатель',
+			color: 'text-blue-300',
+			bg: 'bg-gradient-to-r from-blue-500 to-cyan-600',
+			icon: '🌱',
+			description: 'Продолжайте тренироваться!'
+		};
+	};
 
-  const currentLevel = getLevel(accuracy);
+	const currentLevel = getLevel(accuracy);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
 
-    const width = canvas.width;
-    const height = canvas.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = Math.min(width, height) * 0.4;
+		const width = canvas.width;
+		const height = canvas.height;
+		const centerX = width / 2;
+		const centerY = height / 2;
+		const radius = Math.min(width, height) * 0.35;
 
-    ctx.clearRect(0, 0, width, height);
+		ctx.clearRect(0, 0, width, height);
 
-    const correct = stats.correctAttempts;
-    const incorrect = stats.totalAttempts - correct;
+		// Gradient background
+		const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+		gradient.addColorStop(0, 'rgba(79, 70, 229, 0.1)');
+		gradient.addColorStop(1, 'rgba(147, 51, 234, 0.05)');
+		ctx.fillStyle = gradient;
+		ctx.fillRect(0, 0, width, height);
 
-    if (stats.totalAttempts === 0) {
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
-      ctx.fill();
+		const correct = stats.correctAttempts;
+		const incorrect = stats.totalAttempts - correct;
 
-      ctx.fillStyle = '#93c5fd';
-      ctx.font = 'bold 16px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Нет данных', centerX, centerY);
-      return;
-    }
+		if (stats.totalAttempts === 0) {
+			ctx.beginPath();
+			ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+			ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
+			ctx.fill();
+			ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+			ctx.lineWidth = 3;
+			ctx.stroke();
 
-    const correctPercentage = (correct / stats.totalAttempts) * 100;
-    const incorrectPercentage = (incorrect / stats.totalAttempts) * 100;
+			ctx.fillStyle = '#c7d2fe';
+			ctx.font = 'bold 18px Arial';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText('📊 Нет данных', centerX, centerY);
+			return;
+		}
 
-    const correctColor = '#4ade80';
-    const incorrectColor = '#f87171';
+		const correctPercentage = (correct / stats.totalAttempts) * 100;
+		const incorrectPercentage = (incorrect / stats.totalAttempts) * 100;
 
-    ctx.beginPath();
-    ctx.moveTo(centerX, centerY);
-    ctx.arc(centerX, centerY, radius, 0, (correctPercentage / 100) * 2 * Math.PI);
-    ctx.closePath();
-    ctx.fillStyle = correctColor;
-    ctx.fill();
+		// Correct segment
+		ctx.beginPath();
+		ctx.moveTo(centerX, centerY);
+		ctx.arc(centerX, centerY, radius, 0, (correctPercentage / 100) * 2 * Math.PI);
+		ctx.closePath();
 
-    ctx.beginPath();
-    ctx.moveTo(centerX, centerY);
-    ctx.arc(centerX, centerY, radius,
-      (correctPercentage / 100) * 2 * Math.PI,
-      2 * Math.PI);
-    ctx.closePath();
-    ctx.fillStyle = incorrectColor;
-    ctx.fill();
+		const correctGradient = ctx.createLinearGradient(0, 0, width, 0);
+		correctGradient.addColorStop(0, '#10b981');
+		correctGradient.addColorStop(1, '#34d399');
+		ctx.fillStyle = correctGradient;
+		ctx.fill();
 
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+		// Incorrect segment
+		ctx.beginPath();
+		ctx.moveTo(centerX, centerY);
+		ctx.arc(centerX, centerY, radius,
+			(correctPercentage / 100) * 2 * Math.PI,
+			2 * Math.PI);
+		ctx.closePath();
 
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius * 0.6, 0, 2 * Math.PI);
-    ctx.fillStyle = '#1e293b';
-    ctx.fill();
+		const incorrectGradient = ctx.createLinearGradient(0, 0, width, 0);
+		incorrectGradient.addColorStop(0, '#ef4444');
+		incorrectGradient.addColorStop(1, '#f87171');
+		ctx.fillStyle = incorrectGradient;
+		ctx.fill();
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 20px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`${totalAccuracy.toFixed(1)}%`, centerX, centerY);
+		// Outer border
+		ctx.beginPath();
+		ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+		ctx.strokeStyle = 'rgba(99, 102, 241, 0.8)';
+		ctx.lineWidth = 4;
+		ctx.stroke();
 
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#93c5fd';
-    ctx.fillText('Общая точность', centerX, centerY + 25);
+		// Inner circle
+		ctx.beginPath();
+		ctx.arc(centerX, centerY, radius * 0.5, 0, 2 * Math.PI);
+		ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+		ctx.fill();
 
-    const legendX = centerX;
-    const legendY = centerY + radius + 30;
-    const legendItemHeight = 20;
-    const legendSquareSize = 12;
+		// Center text
+		ctx.fillStyle = '#ffffff';
+		ctx.font = 'bold 24px Arial';
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillText(`${totalAccuracy.toFixed(1)}%`, centerX, centerY - 5);
 
-    ctx.fillStyle = correctColor;
-    ctx.fillRect(legendX - 40, legendY, legendSquareSize, legendSquareSize);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Правильные: ${correct} (${correctPercentage.toFixed(1)}%)`,
-      legendX - 20, legendY + 10);
+		ctx.font = '14px Arial';
+		ctx.fillStyle = '#c7d2fe';
+		ctx.fillText('Общая точность', centerX, centerY + 20);
 
-    ctx.fillStyle = incorrectColor;
-    ctx.fillRect(legendX - 40, legendY + legendItemHeight, legendSquareSize, legendSquareSize);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(`Неправильные: ${incorrect} (${incorrectPercentage.toFixed(1)}%)`,
-      legendX - 20, legendY + legendItemHeight + 10);
+		// Legend
+		const legendX = centerX;
+		const legendY = centerY + radius + 50;
+		const legendItemHeight = 25;
+		const legendSquareSize = 16;
 
-  }, [stats, totalAccuracy]);
+		ctx.fillStyle = '#10b981';
+		ctx.fillRect(legendX - 50, legendY, legendSquareSize, legendSquareSize);
+		ctx.fillStyle = '#ffffff';
+		ctx.font = 'bold 14px Arial';
+		ctx.textAlign = 'left';
+		ctx.fillText(`✅ Правильные: ${correct} (${correctPercentage.toFixed(1)}%)`,
+			legendX - 25, legendY + 12);
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="bg-blue-800 rounded-xl p-6">
-        <h2 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-3">
-          <BarChart3 className="w-8 h-8" />
-          Статистика - Режим {currentMode.toUpperCase()}
-        </h2>
+		ctx.fillStyle = '#ef4444';
+		ctx.fillRect(legendX - 50, legendY + legendItemHeight, legendSquareSize, legendSquareSize);
+		ctx.fillStyle = '#ffffff';
+		ctx.fillText(`❌ Неправильные: ${incorrect} (${incorrectPercentage.toFixed(1)}%)`,
+			legendX - 25, legendY + legendItemHeight + 12);
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-blue-700 p-4 rounded-lg text-center">
-            <div className="text-2xl font-bold text-green-400 flex items-center justify-center gap-2">
-              <Target className="w-5 h-5" />
-              {modeStats.totalAttempts}
-            </div>
-            <div className="text-blue-200">Всего попыток</div>
-          </div>
+	}, [stats, totalAccuracy]);
 
-          <div className="bg-blue-700 p-4 rounded-lg text-center">
-            <div className="text-2xl font-bold text-blue-400 flex items-center justify-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              {accuracy.toFixed(1)}%
-            </div>
-            <div className="text-blue-200">Точность</div>
-          </div>
+	return (
+		<div className="max-w-6xl mx-auto space-y-8 p-4">
+			<div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
+				<div className="text-center mb-8">
+					<h2 className="text-4xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-3">
+						Статистика Тренировок
+					</h2>
+					<p className="text-xl text-blue-300 flex items-center justify-center gap-2">
+						<BarChart3 className="w-6 h-6" />
+						Режим {currentMode.toUpperCase()} • Точность: {accuracy.toFixed(1)}%
+					</p>
+				</div>
 
-          <div className="bg-blue-700 p-4 rounded-lg text-center">
-            <div className="text-2xl font-bold text-yellow-400 flex items-center justify-center gap-2">
-              <Zap className="w-5 h-5" />
-              {modeStats.currentStreak}
-            </div>
-            <div className="text-blue-200">Текущая серия</div>
-          </div>
+				<div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+					<div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-green-500/50 transition-all duration-300 group">
+						<div className="text-3xl font-bold text-green-400 flex items-center justify-center gap-3 mb-3 group-hover:scale-110 transition-transform">
+							<Target className="w-8 h-8" />
+							{modeStats.totalAttempts}
+						</div>
+						<div className="text-blue-200 font-semibold">Всего попыток</div>
+						<div className="text-green-300 text-sm mt-1">Активность</div>
+					</div>
 
-          <div className="bg-blue-700 p-4 rounded-lg text-center">
-            <div className="text-2xl font-bold text-red-400 flex items-center justify-center gap-2">
-              <Crown className="w-5 h-5" />
-              {modeStats.bestStreak}
-            </div>
-            <div className="text-blue-200">Лучшая серия</div>
-          </div>
-        </div>
+					<div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-blue-500/50 transition-all duration-300 group">
+						<div className="text-3xl font-bold text-blue-400 flex items-center justify-center gap-3 mb-3 group-hover:scale-110 transition-transform">
+							<TrendingUp className="w-8 h-8" />
+							{accuracy.toFixed(1)}%
+						</div>
+						<div className="text-blue-200 font-semibold">Точность</div>
+						<div className="text-blue-300 text-sm mt-1">Эффективность</div>
+					</div>
 
-        <div className="bg-blue-900 rounded-lg p-6 mb-6">
-          <h3 className="text-xl font-semibold mb-4 text-center flex items-center justify-center gap-2">
-            <Award className="w-5 h-5" />
-            Уровень мастерства
-          </h3>
-          <div className="text-center mb-4">
-            <span className={`text-2xl font-bold ${currentLevel.color}`}>
-              {currentLevel.name}
-            </span>
-            <div className="text-blue-200 mt-1">Точность: {accuracy.toFixed(1)}%</div>
-          </div>
+					<div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-yellow-500/50 transition-all duration-300 group">
+						<div className="text-3xl font-bold text-yellow-400 flex items-center justify-center gap-3 mb-3 group-hover:scale-110 transition-transform">
+							<Zap className="w-8 h-8" />
+							{modeStats.currentStreak}
+						</div>
+						<div className="text-blue-200 font-semibold">Текущая серия</div>
+						<div className="text-yellow-300 text-sm mt-1">Моментальный успех</div>
+					</div>
 
-          <div className="w-full bg-blue-700 rounded-full h-4 mb-2">
-            <div
-              className={`h-4 rounded-full transition-all duration-500 ${currentLevel.bg}`}
-              style={{ width: `${Math.min(100, accuracy)}%` }}
-            ></div>
-          </div>
+					<div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-2xl border-2 border-blue-500/30 text-center hover:border-red-500/50 transition-all duration-300 group">
+						<div className="text-3xl font-bold text-red-400 flex items-center justify-center gap-3 mb-3 group-hover:scale-110 transition-transform">
+							<Crown className="w-8 h-8" />
+							{modeStats.bestStreak}
+						</div>
+						<div className="text-blue-200 font-semibold">Лучшая серия</div>
+						<div className="text-red-300 text-sm mt-1">Рекорд</div>
+					</div>
+				</div>
 
-          <div className="flex justify-between text-sm text-blue-200">
-            <span>0%</span>
-            <span>50%</span>
-            <span>100%</span>
-          </div>
-        </div>
-      </div>
+				<div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 p-8 rounded-2xl border-2 border-purple-500/30">
+					<h3 className="text-2xl font-bold text-center mb-6 text-white flex items-center justify-center gap-3">
+						<Trophy className="w-7 h-7 text-yellow-400" />
+						Уровень Мастерства
+					</h3>
 
-      <div className="bg-blue-800 rounded-xl p-6">
-        <h3 className="text-2xl font-bold text-center mb-6">Общая статистика точности</h3>
+					<div className="text-center mb-6">
+						<div className="text-4xl font-bold mb-3">
+							<span className={currentLevel.color}>{currentLevel.icon} {currentLevel.name}</span>
+						</div>
+						<p className="text-blue-300 text-lg mb-4">{currentLevel.description}</p>
+						<div className="text-2xl font-bold text-green-400">
+							Точность: {accuracy.toFixed(1)}%
+						</div>
+					</div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex-1">
-            <canvas
-              ref={canvasRef}
-              width={400}
-              height={300}
-              className="w-full max-w-md mx-auto"
-            />
-          </div>
+					<div className="space-y-4">
+						<div className="w-full bg-gray-700 rounded-full h-6 overflow-hidden border-2 border-gray-600">
+							<div
+								className={`h-6 rounded-full transition-all duration-1000 ease-out ${currentLevel.bg} shadow-lg`}
+								style={{ width: `${Math.min(100, accuracy)}%` }}
+							></div>
+						</div>
 
-          <div className="flex-1 bg-blue-700 p-6 rounded-lg">
-            <h4 className="text-lg font-semibold mb-4 text-center">Сводка по всем режимам</h4>
+						<div className="flex justify-between text-sm font-semibold">
+							<span className="text-blue-300">🌱 Начинающий (0%)</span>
+							<span className="text-green-300">🚀 Уверенный (30%)</span>
+							<span className="text-yellow-300">⭐ Опытный (60%)</span>
+							<span className="text-red-300">🏆 Мастер (85%)</span>
+						</div>
+					</div>
+				</div>
+			</div>
 
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-blue-600 rounded">
-                <span className="text-blue-200">Всего попыток:</span>
-                <span className="text-white font-bold text-lg">{stats.totalAttempts}</span>
-              </div>
+			<div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
+				<h3 className="text-3xl font-bold text-center mb-8 text-white flex items-center justify-center gap-3">
+					<Activity className="w-8 h-8 text-green-400" />
+					Анализ Эффективности
+				</h3>
 
-              <div className="flex justify-between items-center p-3 bg-blue-600 rounded">
-                <span className="text-blue-200">Правильные ответы:</span>
-                <span className="text-green-400 font-bold text-lg">{stats.correctAttempts}</span>
-              </div>
+				<div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+					<div className="flex-1 bg-gradient-to-br from-blue-900/30 to-purple-900/30 p-6 rounded-2xl border-2 border-blue-500/20">
+						<div className="text-center mb-4">
+							<h4><span className='text-xl font-bold text-white mb-2 flex items-center justify-center gap-2'><ChartPie className='h-6 w-6' />Визуализация Результатов</span></h4>
+							<p className="text-blue-300">Общая статистика точности</p>
+						</div>
+						<canvas
+							ref={canvasRef}
+							width={400}
+							height={350}
+							className="w-full max-w-md mx-auto bg-gradient-to-br from-blue-900/20 to-purple-900/20 rounded-xl p-4 border border-blue-500/10"
+						/>
+					</div>
 
-              <div className="flex justify-between items-center p-3 bg-blue-600 rounded">
-                <span className="text-blue-200">Неправильные ответы:</span>
-                <span className="text-red-400 font-bold text-lg">
-                  {stats.totalAttempts - stats.correctAttempts}
-                </span>
-              </div>
+					<div className="flex-1 bg-gradient-to-br from-purple-900/30 to-blue-900/30 p-6 rounded-2xl border-2 border-purple-500/20">
+						<h4 className="text-2xl font-bold text-center mb-6 text-white flex items-center justify-center gap-2">
+							<Users className="w-6 h-6" />
+							Сводка Производительности
+						</h4>
 
-              <div className="flex justify-between items-center p-3 bg-blue-600 rounded">
-                <span className="text-blue-200">Общая точность:</span>
-                <span className="text-yellow-400 font-bold text-lg">{totalAccuracy.toFixed(1)}%</span>
-              </div>
+						<div className="space-y-4">
+							{[
+								{ label: '🎯 Всего попыток:', value: stats.totalAttempts, color: 'text-white' },
+								{ label: '✅ Правильные ответы:', value: stats.correctAttempts, color: 'text-green-400' },
+								{ label: '❌ Неправильные ответы:', value: stats.totalAttempts - stats.correctAttempts, color: 'text-red-400' },
+								{ label: '📊 Общая точность:', value: `${totalAccuracy.toFixed(1)}%`, color: 'text-yellow-400' },
+								{ label: '⚡ Текущая серия:', value: stats.currentStreak, color: 'text-purple-400' },
+								{ label: '👑 Лучшая серия:', value: stats.bestStreak, color: 'text-pink-400' },
+							].map((item, index) => (
+								<div key={index} className="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all group">
+									<span className="text-blue-200 font-semibold group-hover:text-white transition-colors">
+										{item.label}
+									</span>
+									<span className={`text-lg font-bold ${item.color} group-hover:scale-110 transition-transform`}>
+										{item.value}
+									</span>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</div>
 
-              <div className="flex justify-between items-center p-3 bg-blue-600 rounded">
-                <span className="text-blue-200">Текущая серия:</span>
-                <span className="text-purple-400 font-bold text-lg">{stats.currentStreak}</span>
-              </div>
+			<div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
+				<h3 className="text-3xl font-bold text-center mb-8 text-white flex items-center justify-center gap-3">
+					<TrendingUp className="w-8 h-8 text-green-400" />
+					Сравнение Режимов
+				</h3>
 
-              <div className="flex justify-between items-center p-3 bg-blue-600 rounded">
-                <span className="text-blue-200">Лучшая серия:</span>
-                <span className="text-pink-400 font-bold text-lg">{stats.bestStreak}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					<div className="bg-gradient-to-br from-green-900/30 to-blue-900/30 p-6 rounded-2xl border-2 border-green-500/30 hover:border-green-400/50 transition-all group">
+						<h4 className="text-2xl font-bold mb-4 text-green-400 flex items-center gap-3">
+							<div className="p-2 bg-green-500/20 rounded-lg">
+								<span>🎯</span>
+							</div>
+							2D Режим
+						</h4>
+						<div className="space-y-4">
+							{[
+								{ label: 'Попытки:', value: stats.modeStats['2d'].totalAttempts, icon: '🎯' },
+								{ label: 'Точность:', value: `${(stats.modeStats['2d'].totalAttempts > 0 ? (stats.modeStats['2d'].correctAttempts / stats.modeStats['2d'].totalAttempts) * 100 : 0).toFixed(1)}%`, icon: '📊' },
+								{ label: 'Лучшая серия:', value: stats.modeStats['2d'].bestStreak, icon: '👑' },
+							].map((item, index) => (
+								<div key={index} className="flex justify-between items-center p-3 bg-white/5 rounded-lg group-hover:bg-white/10 transition-all">
+									<span className="text-green-300 font-semibold flex items-center gap-2">
+										{item.icon} {item.label}
+									</span>
+									<span className="text-white font-bold text-lg">{item.value}</span>
+								</div>
+							))}
+						</div>
+					</div>
 
-      <div className="bg-blue-800 rounded-xl p-6">
-        <h3 className="text-2xl font-bold text-center mb-4">Сравнение режимов</h3>
+					<div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 p-6 rounded-2xl border-2 border-purple-500/30 hover:border-purple-400/50 transition-all group">
+						<h4 className="text-2xl font-bold mb-4 text-purple-400 flex items-center gap-3">
+							<div className="p-2 bg-purple-500/20 rounded-lg">
+								<span>🎮</span>
+							</div>
+							3D Режим
+						</h4>
+						<div className="space-y-4">
+							{[
+								{ label: 'Попытки:', value: stats.modeStats['3d'].totalAttempts, icon: '🎮' },
+								{ label: 'Точность:', value: `${(stats.modeStats['3d'].totalAttempts > 0 ? (stats.modeStats['3d'].correctAttempts / stats.modeStats['3d'].totalAttempts) * 100 : 0).toFixed(1)}%`, icon: '📈' },
+								{ label: 'Лучшая серия:', value: stats.modeStats['3d'].bestStreak, icon: '🏆' },
+							].map((item, index) => (
+								<div key={index} className="flex justify-between items-center p-3 bg-white/5 rounded-lg group-hover:bg-white/10 transition-all">
+									<span className="text-purple-300 font-semibold flex items-center gap-2">
+										{item.icon} {item.label}
+									</span>
+									<span className="text-white font-bold text-lg">{item.value}</span>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-blue-700 p-4 rounded-lg">
-            <h4 className="text-lg font-semibold mb-3 text-green-400">2D Режим</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Попытки:</span>
-                <span className="font-bold">{stats.modeStats['2d'].totalAttempts}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Точность:</span>
-                <span className="font-bold">
-                  {stats.modeStats['2d'].totalAttempts > 0
-                    ? ((stats.modeStats['2d'].correctAttempts / stats.modeStats['2d'].totalAttempts) * 100).toFixed(1)
-                    : '0'}%
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Лучшая серия:</span>
-                <span className="font-bold">{stats.modeStats['2d'].bestStreak}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-blue-700 p-4 rounded-lg">
-            <h4 className="text-lg font-semibold mb-3 text-purple-400">3D Режим</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Попытки:</span>
-                <span className="font-bold">{stats.modeStats['3d'].totalAttempts}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Точность:</span>
-                <span className="font-bold">
-                  {stats.modeStats['3d'].totalAttempts > 0
-                    ? ((stats.modeStats['3d'].correctAttempts / stats.modeStats['3d'].totalAttempts) * 100).toFixed(1)
-                    : '0'}%
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Лучшая серия:</span>
-                <span className="font-bold">{stats.modeStats['3d'].bestStreak}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="text-center text-blue-200">
-        <p>Статистика сохраняется автоматически. Продолжайте тренировки для улучшения результатов!</p>
-      </div>
-    </div>
-  );
+			<div className="text-center">
+				<div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 p-6 rounded-2xl border-2 border-green-500/30">
+					<p className="text-green-300 text-lg font-semibold mb-2">
+						🚀 Статистика сохраняется автоматически
+					</p>
+					<p className="text-blue-300">
+						Продолжайте тренировки для улучшения пространственного слуха!
+					</p>
+				</div>
+			</div>
+		</div>
+	);
 }
