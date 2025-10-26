@@ -38,28 +38,28 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 		if (acc >= 85) return {
 			name: 'Мастер Эхолокации',
 			color: 'text-red-300',
-			bg: 'bg-gradient-to-r from-red-500 to-pink-600',
+			bg: 'bg-linear-to-r from-red-500 to-pink-600',
 			icon: '🏆',
 			description: 'Превосходное чувство пространства!'
 		};
 		if (acc >= 60) return {
 			name: 'Опытный Навигатор',
 			color: 'text-yellow-300',
-			bg: 'bg-gradient-to-r from-yellow-500 to-orange-600',
+			bg: 'bg-linear-to-r from-yellow-500 to-orange-600',
 			icon: '⭐',
 			description: 'Отличные результаты!'
 		};
 		if (acc >= 30) return {
 			name: 'Уверенный Новичок',
 			color: 'text-green-300',
-			bg: 'bg-gradient-to-r from-green-500 to-emerald-600',
+			bg: 'bg-linear-to-r from-green-500 to-emerald-600',
 			icon: '🚀',
 			description: 'Хороший прогресс!'
 		};
 		return {
 			name: 'Начинающий Искатель',
 			color: 'text-blue-300',
-			bg: 'bg-gradient-to-r from-blue-500 to-cyan-600',
+			bg: 'bg-linear-to-r from-blue-500 to-cyan-600',
 			icon: '🌱',
 			description: 'Продолжайте тренироваться!'
 		};
@@ -188,7 +188,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 		<div className="max-w-6xl mx-auto space-y-8 p-4">
 			<div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl">
 				<div className="text-center mb-8">
-					<h2 className="text-4xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-3">
+					<h2 className="text-4xl font-bold bg-linear-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-3">
 						Статистика Тренировок
 					</h2>
 					<p className="text-xl text-blue-300 flex items-center justify-center gap-2">
@@ -235,7 +235,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 					</div>
 				</div>
 
-				<div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 p-8 rounded-2xl border-2 border-purple-500/30">
+				<div className="bg-linear-to-r from-purple-900/50 to-blue-900/50 p-8 rounded-2xl border-2 border-purple-500/30">
 					<h3 className="text-2xl font-bold text-center mb-6 text-white flex items-center justify-center gap-3">
 						<Trophy className="w-7 h-7 text-yellow-400" />
 						Уровень Мастерства
@@ -374,7 +374,7 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 			</div>
 
 			<div className="text-center">
-				<div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 p-6 rounded-2xl border-2 border-green-500/30">
+				<div className="bg-linear-to-r from-green-500/20 to-blue-500/20 p-6 rounded-2xl border-2 border-green-500/30">
 					<p className="text-green-300 text-lg font-semibold mb-2">
 						🚀 Статистика сохраняется автоматически
 					</p>

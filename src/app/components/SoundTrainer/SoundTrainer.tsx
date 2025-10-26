@@ -430,10 +430,10 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
 
     return (
         <div className="flex flex-col items-center space-y-8">
-            <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-2xl p-6 w-full max-w-4xl border-2 border-purple-500/30 shadow-2xl">
+            <div className="bg-linear-to-br from-gray-900 via-blue-900 to-purple-900 rounded-2xl p-6 w-full max-w-4xl border-2 border-purple-500/30 shadow-2xl">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div>
-                        <label className="flex items-center gap-2 block text-sm font-semibold mb-3 text-blue-200 uppercase tracking-wide">
+                        <label className="flex items-center gap-2 text-sm font-semibold mb-3 text-blue-200 uppercase tracking-wide">
                             <DraftingCompass className='w-4 h-4' />
                             Сложность
                         </label>
@@ -446,7 +446,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     </div>
 
                     <div>
-                        <label className="flex items-center gap-2 block text-sm font-semibold mb-3 text-purple-200 uppercase tracking-wide">
+                        <label className="flex items-center gap-2 text-sm font-semibold mb-3 text-purple-200 uppercase tracking-wide">
                             <AudioWaveform className='w-4 h-4' />
                             Тип звука
                         </label>
@@ -459,7 +459,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     </div>
 
                     <div>
-                        <label className="flex items-center gap-2 block text-sm font-semibold mb-3 text-red-200 uppercase tracking-wide">
+                        <label className="flex items-center gap-2 text-sm font-semibold mb-3 text-red-200 uppercase tracking-wide">
                             <Boxes className='w-4 h-4' />
                             Препятствия
                         </label>
@@ -488,7 +488,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                 </div>
 
                 <div className="mb-6">
-                    <label className="flex items-center gap-2 block text-sm font-semibold mb-3 text-green-200 uppercase tracking-wide">
+                    <label className="flex items-center gap-2 text-sm font-semibold mb-3 text-green-200 uppercase tracking-wide">
                         <TriangleRight className='w-4 h-4' /> Громкость: {Math.round(settings.volume * 100)}%
                     </label>
                     <div className="relative">
@@ -499,7 +499,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                             step="0.1"
                             value={settings.volume}
                             onChange={(e) => setVolume(parseFloat(e.target.value))}
-                            className="w-full h-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-purple-500 [&::-webkit-slider-thumb]:shadow-lg"
+                            className="w-full h-3 bg-linear-to-r from-blue-600 to-purple-600 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-purple-500 [&::-webkit-slider-thumb]:shadow-lg"
                         />
                         <div className="flex justify-between text-xs text-blue-300 mt-2">
                             <span>0%</span>
@@ -535,7 +535,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     <button
                         onClick={startNewRound}
                         disabled={isPlaying}
-                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 disabled:from-green-800 disabled:to-emerald-900 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg border-2 border-green-500/30 disabled:border-green-800/30 disabled:cursor-not-allowed"
+                        className="cursor-pointer flex-1 bg-linear-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 disabled:from-green-800 disabled:to-emerald-900 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg border-2 border-green-500/30 disabled:border-green-800/30 disabled:cursor-not-allowed"
                     >
                         {isPlaying ? (
                             <>
@@ -553,7 +553,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                     {isPlaying && (
                         <button
                             onClick={stopSound}
-                            className="px-8 bg-gradient-to-r from-red-600 to-pink-700 hover:from-red-700 hover:to-pink-800 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg border-2 border-red-500/30"
+                            className="cursor-pointer px-8 bg-linear-to-r from-red-600 to-pink-700 hover:from-red-700 hover:to-pink-800 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg border-2 border-red-500/30"
                         >
                             <StopCircle className="w-5 h-5" />
                             Стоп
@@ -572,7 +572,7 @@ export default function SoundTrainer({ setStats, currentMode }: SoundTrainerProp
                         className={`border-4 rounded-2xl ${statusFind ?
                             'cursor-crosshair border-green-500/50 shadow-2xl shadow-green-500/20' :
                             'cursor-not-allowed opacity-80 border-blue-500/30'
-                            } bg-gradient-to-br from-slate-900 to-blue-900 transition-all duration-700 hover:border-green-500/70`}
+                            } bg-linear-to-br from-slate-900 to-blue-900 transition-all duration-700 hover:border-green-500/70`}
                         style={{ width: canvasSize, height: canvasSize }}
                     />
 

@@ -41,7 +41,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white p-4 rounded-full shadow-2xl transition-all z-50 cursor-pointer group border-2 border-purple-400/30"
+                className="fixed bottom-6 right-6 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white p-4 rounded-full shadow-2xl transition-all z-50 cursor-pointer group border-2 border-purple-400/30"
                 title="Помощь и инструкции"
             >
                 <HelpCircle className="w-7 h-7 group-hover:scale-110 transition-transform" />
@@ -49,14 +49,14 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
 
             {isOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-                    <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-2xl max-w-5xl max-h-[95vh] overflow-y-auto border-2 border-purple-500/30 shadow-2xl">
-                        <div className="sticky top-0 bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-6 border-b border-purple-500/30 flex justify-between items-center backdrop-blur-sm">
+                    <div className="bg-linear-to-br from-gray-900 via-blue-900 to-purple-900 rounded-2xl max-w-5xl max-h-[95vh] overflow-y-auto border-2 border-purple-500/30 shadow-2xl">
+                        <div className="sticky top-0 bg-linear-to-r from-blue-900/90 to-purple-900/90 p-6 border-b border-purple-500/30 flex justify-between items-center backdrop-blur-sm">
                             <div className="flex items-center gap-4">
-                                <div className="p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
+                                <div className="p-2 bg-linear-to-r from-purple-600 to-blue-600 rounded-lg">
                                     <BookOpenText className="w-7 h-7 text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                                    <h2 className="text-2xl font-bold bg-linear-to-r from-white to-blue-200 bg-clip-text text-transparent">
                                         Помощь - Режим {currentMode.toUpperCase()}
                                     </h2>
                                 </div>
@@ -73,7 +73,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                             <div className="grid lg:grid-cols-2 gap-8">
                                 <div className="space-y-6">
                                     {instructions.slice(0, 2).map((section, index) => (
-                                        <div key={index} className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-all">
+                                        <div key={index} className="bg-linear-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-all">
                                             <h3 className={`text-xl font-bold mb-4 ${section.color} flex items-center gap-3`}>
                                                 <div className="p-2 bg-white/10 rounded-lg">
                                                     {section.icon}
@@ -87,7 +87,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                                     ))}
 
                                     {/* Sound Types */}
-                                    <div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-purple-500/20">
+                                    <div className="bg-linear-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-purple-500/20">
                                         <h3 className="text-xl font-bold mb-4 text-purple-300 flex items-center gap-3">
                                             <div className="p-2 bg-purple-500/20 rounded-lg">
                                                 {soundTypes.bell.icon}
@@ -110,7 +110,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                                 {/* Right Column */}
                                 <div className="space-y-6">
                                     {instructions.slice(2).map((section, index) => (
-                                        <div key={index} className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-all">
+                                        <div key={index} className="bg-linear-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-all">
                                             <h3 className={`text-xl font-bold mb-4 ${section.color} flex items-center gap-3`}>
                                                 <div className="p-2 bg-white/10 rounded-lg">
                                                     {section.icon}
@@ -124,7 +124,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                                     ))}
 
                                     {/* Obstacles */}
-                                    <div className="bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-purple-500/20">
+                                    <div className="bg-linear-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-purple-500/20">
                                         <h3 className="text-xl font-bold mb-4 text-red-300 flex items-center gap-3">
                                             <div className="p-2 bg-red-500/20 rounded-lg">
                                                 <ToyBrick className='w-5 h-5' />
@@ -149,7 +149,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                             </div>
 
                             {/* Training Tips */}
-                            <div className="bg-gradient-to-r from-purple-800/50 to-blue-800/50 p-6 rounded-2xl border border-purple-500/30">
+                            <div className="bg-linear-to-r from-purple-800/50 to-blue-800/50 p-6 rounded-2xl border border-purple-500/30">
                                 <h3 className="text-xl font-bold mb-6 text-center text-white flex items-center justify-center gap-3">
                                     <Target className="w-6 h-6 text-green-400" />
                                     Советы для эффективной тренировки
@@ -180,7 +180,7 @@ export default function HelpModal({ currentMode }: HelpModalProps) {
                             </div>
 
                             {threeDInstructions && (
-                                <div className="bg-gradient-to-r from-purple-700/40 to-blue-700/40 p-6 rounded-2xl border border-purple-500/30">
+                                <div className="bg-linear-to-r from-purple-700/40 to-blue-700/40 p-6 rounded-2xl border border-purple-500/30">
                                     <h3 className={`text-xl font-bold mb-6 text-center ${threeDInstructions.color} flex items-center justify-center gap-3`}>
                                         <div className="p-2 bg-white/10 rounded-lg">
                                             {threeDInstructions.icon}

@@ -30,7 +30,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, opt
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full bg-gradient-to-br from-blue-800 to-purple-800 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white text-sm flex items-center justify-between hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-purple-500/20"
+                className="cursor-pointer w-full bg-linear-to-br from-blue-800 to-purple-800 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white text-sm flex items-center justify-between hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-purple-500/20"
             >
                 <div className="flex items-center space-x-3">
                     <div className="text-purple-300">
@@ -42,7 +42,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, opt
             </button>
 
             {isOpen && (
-                <div className="absolute z-10 w-full mt-2 bg-gradient-to-br from-gray-900 to-blue-900 border-2 border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 max-h-60 overflow-auto">
+                <div className="absolute z-10 w-full mt-2 bg-linear-to-br from-gray-900 to-blue-900 border-2 border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 max-h-60 overflow-auto">
                     {options.map((option) => (
                         <button
                             key={option.value}
