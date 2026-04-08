@@ -14,57 +14,65 @@
 
 ---
 
-## 🚀 About the project
+## Demo
+
+You can view the live demo here: [tap here](https://blind-sound-git-main-trylastskys-projects.vercel.app/)
+
+---
+
+## About the project
 
 **Blind Sound** is an interactive hearing trainer where you:
 
 1. Play a sound from a hidden position.
-2. Guess where it came from (2D or 3D space).
-3. Get immediate feedback and track your progress.
+2. Guess where it came from (in 2D or 3D space).
+3. Get instant feedback and track your progress.
 
-The goal is simple: improve your ability to localize sound sources through short, repeatable sessions.
-
----
-
-## ✨ Why this pet project is interesting
-
-- Combines **UX, audio logic, and visual interaction** in one app.
-- Uses **Web Audio API** for synthetic sound generation and processing.
-- Supports both **2D canvas gameplay** and **3D scene interaction**.
-- Tracks learning progress with streak and accuracy metrics.
-- Saves settings and stats locally for a smooth return experience.
+The goal is to improve spatial hearing and sound-source localization through short, repeatable practice sessions.
 
 ---
 
-## 🎮 Features
+## Features
 
-### Training modes
-- **2D mode** — classic directional localization on a circular field.
-- **3D mode** — depth-aware guessing with visual spatial context.
-
-### Gameplay controls
-- Difficulty: **Easy / Medium / Hard**
-- Sound types: multiple synthetic profiles
-- Obstacles simulation:
-  - `none`
-  - `wall`
-  - `pillar`
-  - `corner`
-  - `tunnel`
-  - `maze`
-- Adjustable volume
-
-### Progress & persistence
-- Total attempts
-- Correct attempts / accuracy
-- Current streak
-- Best streak
-- Separate mode stats (2D & 3D)
-- Persisted in `localStorage`
+- **2D and 3D training modes**
+- **Difficulty presets**: Easy / Medium / Hard
+- **Sound type selection**
+- **Obstacle simulation**: `none`, `wall`, `pillar`, `corner`, `tunnel`, `maze`
+- **Volume control**
+- **Player statistics**: attempts, accuracy, current streak, best streak
+- **Persistent progress** via `localStorage`
 
 ---
 
-## 🧱 Tech stack
+## Screenshots
+
+### 1) Main training screen (3D mode + controls)
+
+Main app view in 3D mode with mode switch, sound selection, obstacle selection, and round controls.
+
+![Main training screen in 3D mode](./public/screen_1.jpg)
+
+### 2) 2D training mode
+
+2D mode interface that demonstrates support for multiple training modes.
+
+![2D training mode screen](./public/screen_2.jpg)
+
+### 3) Player statistics overview
+
+Overview of player progress and key performance metrics.
+
+![Player statistics overview](./public/screen_3.jpg)
+
+### 4) Detailed player statistics
+
+Detailed statistics view for deeper performance analysis.
+
+![Detailed player statistics](./public/screen_4.jpg)
+
+---
+
+## Tech stack
 
 - **Framework:** Next.js 16 (App Router)
 - **UI:** React 19 + Tailwind CSS 4
@@ -75,7 +83,7 @@ The goal is simple: improve your ability to localize sound sources through short
 
 ---
 
-## ⚙️ Getting started
+## Getting started
 
 ### 1) Clone the repository
 
