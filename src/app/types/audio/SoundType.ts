@@ -1,1 +1,12 @@
-export type SoundType = 'bell' | 'chime' | 'kalimba' | 'marimba' | 'singingBowl' | 'guitar' | 'piano' | 'flute' | 'xylophone' | 'ocean' | 'wind';
+export type SoundType = 
+    'bell'
+    | 'chime'
+    | 'kalimba'
+    | 'marimba'
+    | 'singingBowl'
+    | 'guitar'
+    | 'piano'
+    | 'flute'
+    | 'xylophone'
+    | 'ocean'
+    | 'wind';

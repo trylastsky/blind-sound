@@ -78,7 +78,6 @@ export default function Stats({ stats, currentMode }: StatsProps) {
 
 		ctx.clearRect(0, 0, width, height);
 
-		// Gradient background
 		const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
 		gradient.addColorStop(0, 'rgba(79, 70, 229, 0.1)');
 		gradient.addColorStop(1, 'rgba(147, 51, 234, 0.05)');

@@ -25,7 +25,7 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
     const floorRef = useRef<THREE.Mesh | null>(null);
     const animationRef = useRef<number>(0);
 
-    // Константы для координат (совпадают с 2D режимом)
+    // Константы для координат
     const CANVAS_SIZE = 400;
     const CANVAS_RADIUS = 150;
     const SCENE_RADIUS = 2.5;
@@ -152,7 +152,7 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
         });
         markers.forEach(marker => sceneRef.current!.remove(marker));
 
-        // Добавляем маркер источника звука (зеленый)
+        // маркер источника звука (зеленый)
         if (showResult && soundSource) {
             const sourceGeometry = new THREE.SphereGeometry(0.1);
             const sourceMaterial = new THREE.MeshPhongMaterial({ color: 0x4ade80 });
@@ -163,14 +163,13 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
             sourceMarker.userData = { isMarker: true };
             sceneRef.current.add(sourceMarker);
 
-            // Добавляем свечение для источника
             const sourceLight = new THREE.PointLight(0x4ade80, 0.5, 1);
             sourceLight.position.copy(sourcePos);
             sourceLight.userData = { isMarker: true };
             sceneRef.current.add(sourceLight);
         }
 
-        // Добавляем маркер предположения пользователя
+        // маркер предположения пользователя
         if (userGuess) {
             const guessGeometry = new THREE.SphereGeometry(0.08);
             const guessMaterial = new THREE.MeshPhongMaterial({
@@ -183,7 +182,6 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
             guessMarker.userData = { isMarker: true };
             sceneRef.current.add(guessMarker);
 
-            // Добавляем линию между предположением и источником
             if (showResult && soundSource) {
                 const lineGeometry = new THREE.BufferGeometry();
                 const sourcePos = point2DTo3D(soundSource);
@@ -289,8 +287,6 @@ export default function ThreeScene({ obstacleType, onPointSelect, soundSource, u
         createAxisLabel('Зад', new THREE.Vector3(0, 0, SCENE_RADIUS + 0.3));
         createAxisLabel('Лево', new THREE.Vector3(-SCENE_RADIUS - 0.3, 0, 0));
         createAxisLabel('Право', new THREE.Vector3(SCENE_RADIUS + 0.3, 0, 0));
-
-        // Создаем препятствия
         createObstacles(scene);
 
         // Обработчик кликов
